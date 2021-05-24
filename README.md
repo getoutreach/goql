@@ -49,8 +49,7 @@ query($filter: [Filter], $sort: [String], $size: Int, $before: String, $after: S
 }
 ```
 
-These types should be defined in `internal/giraffe`, grouped under appropriate files. For example, for the operation
-above which retrieves users, an appropriate file name to group itself and similar operations under would be `users.go`.
+Here's the high-level steps to go through when first defining a GraphQL operation:
 
 1. Create a struct that will act as a wrapper for the entire operation. The top-level model will be the only immediate
 child struct field of this wrapper struct (e.g. `QueryUserCollection`'s only immediate child is `UserCollection` which
