@@ -1,0 +1,29 @@
+name: goql
+reportingTeam: cia-dev-tooling
+slack: ""
+grpc: false
+kafka: false
+http: false
+library: true
+scanAtBuild: false
+commands: []
+grpcClients: []
+adminPermissions: {}
+e2e:
+  requires: []
+  skips: []
+releaseType: semver
+releaseOptions:
+  allowPrereleases: false
+  allowMajorVersions: null
+deployToProd: ""
+resources: {}
+versions: {}
+authn:
+  audiences: []
+  canImpersonateUser: false
+  permittedUserScopes: ""
+  serviceActor:
+    audiences: []
+    actorTypes: []
+    governanceActors: []
