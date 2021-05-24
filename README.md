@@ -73,7 +73,7 @@ modifying declarations, adding aliases, variables, or directives to each field. 
 [GraphQL Struct Tag Syntax](#graphql-struct-tag-syntax), for more information on these struct tags and how to define
 them.
 
-## GraphQL Struct Tag Syntax
+### GraphQL Struct Tag Syntax
 
 The following components can be used alone or together, separated by a comma within in the tag, to define a `graphql`
 struct tag for a field or model on an operation:
