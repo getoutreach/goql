@@ -1,15 +1,16 @@
 # goql
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://google.com)
-[![CircleCI](https://circleci.com/gh/getoutreach/goql.svg?style=shield&circle-token=<YOUR_STATUS_API_TOKEN:READ:https://circleci.com/docs/2.0/status-badges/>)](https://circleci.com/gh/getoutreach/goql)
+[![Go Reference](https://pkg.go.dev/badge/github.com/getoutreach/goql.svg)](https://pkg.go.dev/github.com/getoutreach/goql)
+[![CircleCI](https://circleci.com/gh/getoutreach/goql.svg?style=shield&circle-token=<b37cc0386e76b70d4bab8994c68e39c62f293d63:READ:https://circleci.com/docs/2.0/status-badges/>)](https://circleci.com/gh/getoutreach/goql)
 [![Generated via Bootstrap](https://img.shields.io/badge/Outreach-Bootstrap-%235951ff)](https://github.com/getoutreach/bootstrap)
 
 goql is a GraphQL client library with built-in two-way marshaling support via struct tags. This is key because it allows
 for strongly typed GraphQL queries as opposed to variables containing a string representation of the query. This also
 facilitates more advanced features, such as sparse field sets.
 
-For complete documentation see the generated [pkg.go documentation](http://google.com). For a complete guide on the
-struct tag syntax, see the documentation found below under [Defining GraphQL Operations](#defining-graphql-operations).
+For complete documentation see the generated [pkg.go documentation](https://pkg.go.dev/github.com/getoutreach/goql). For
+a complete guide on the struct tag syntax, see the documentation found below under
+[Defining GraphQL Operations](#defining-graphql-operations).
 
 ## Installation
 
