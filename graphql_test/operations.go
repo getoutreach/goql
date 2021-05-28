@@ -65,7 +65,7 @@ type (
 var MutationDeleteEntity DeleteEntity
 
 type DeleteEntity struct {
-	ShallowEntity `graphql:"deleteEntity(id:$id<ID!>)"`
+	ShallowEntity `goql:"deleteEntity(id:$id<ID!>)"`
 }
 
 func (*DeleteEntity) operationName() string {
@@ -87,7 +87,7 @@ func (*DeleteEntity) Variables() map[string]interface{} {
 var MutationUpdateEntity UpdateEntity
 
 type UpdateEntity struct {
-	Entity `graphql:"updateEntity(id:$id<ID!>,entity:$entity<Entity!>)"`
+	Entity `goql:"updateEntity(id:$id<ID!>,entity:$entity<Entity!>)"`
 }
 
 func (*UpdateEntity) operationName() string {
@@ -117,7 +117,7 @@ func (*UpdateEntity) Variables() map[string]interface{} {
 var MutationCreateEntity CreateEntity
 
 type CreateEntity struct {
-	Entity `graphql:"createEntity(entity:$entity<Entity!>)"`
+	Entity `goql:"createEntity(entity:$entity<Entity!>)"`
 }
 
 func (*CreateEntity) operationName() string {
@@ -146,7 +146,7 @@ func (*CreateEntity) Variables() map[string]interface{} {
 var QueryGetEntity GetEntity
 
 type GetEntity struct {
-	Entity `graphql:"getEntity(id:$id<ID!>)"`
+	Entity `goql:"getEntity(id:$id<ID!>)"`
 }
 
 func (*GetEntity) operationName() string {

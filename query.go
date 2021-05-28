@@ -12,7 +12,7 @@ import (
 
 // structTag is the name of the struct tag that this package uses to extract extra information
 // from to build GraphQL operations.
-const structTag = "graphql"
+const structTag = "goql"
 
 // Compiled regular expressions.
 var (

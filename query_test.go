@@ -117,7 +117,7 @@ fieldTwo
 				TestQuery struct {
 					FieldOne string
 					FieldTwo string
-				} `graphql:"testQuery(id:$id<ID!>)"`
+				} `goql:"testQuery(id:$id<ID!>)"`
 			}{},
 			Fields: nil,
 			ExpectedOutput: `query($id: ID!) {
@@ -131,7 +131,7 @@ fieldTwo
 			Name: "WithNameOverride",
 			Input: struct {
 				TestQuery struct {
-					FieldOne string `graphql:"FieldOneOverride"`
+					FieldOne string `goql:"FieldOneOverride"`
 					FieldTwo string
 				}
 			}{},
@@ -147,7 +147,7 @@ fieldTwo
 			Name: "WithAlias",
 			Input: struct {
 				TestQuery struct {
-					FieldOne string `graphql:"@alias(fieldOneAlias)"`
+					FieldOne string `goql:"@alias(fieldOneAlias)"`
 					FieldTwo string
 				}
 			}{},
@@ -164,7 +164,7 @@ fieldTwo
 			Input: struct {
 				TestQuery struct {
 					FieldOne string
-					FieldTwo string `graphql:"@skip($ifCondition)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
 				}
 			}{},
 			Fields: nil,
@@ -180,7 +180,7 @@ fieldTwo @skip(if: $ifCondition)
 			Input: struct {
 				TestQuery struct {
 					FieldOne string
-					FieldTwo string `graphql:"@include($ifCondition)"`
+					FieldTwo string `goql:"@include($ifCondition)"`
 				}
 			}{},
 			Fields: nil,
@@ -197,7 +197,7 @@ fieldTwo @include(if: $ifCondition)
 				TestQuery struct {
 					FieldOne string
 					FieldTwo string
-				} `graphql:"keep"`
+				} `goql:"keep"`
 			}{},
 			Fields: Fields{
 				"fieldOne": true,
@@ -212,9 +212,9 @@ fieldOne
 			Name: "Complex",
 			Input: struct {
 				TestQuery struct {
-					FieldOne string `graphql:"@alias(fooBar)"`
-					FieldTwo string `graphql:"@skip($ifCondition)"`
-				} `graphql:"testQuery(id:$id<ID!>)"`
+					FieldOne string `goql:"@alias(fooBar)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
+				} `goql:"testQuery(id:$id<ID!>)"`
 			}{},
 			Fields: nil,
 			ExpectedOutput: `query($id: ID!, $ifCondition: Boolean!) {
@@ -228,9 +228,9 @@ fieldTwo @skip(if: $ifCondition)
 			Name: "ComplexWithSparseFieldset",
 			Input: struct {
 				TestQuery struct {
-					FieldOne string `graphql:"@alias(fooBar)"`
-					FieldTwo string `graphql:"@skip($ifCondition)"`
-				} `graphql:"testQuery(id:$id<ID!>)"`
+					FieldOne string `goql:"@alias(fooBar)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
+				} `goql:"testQuery(id:$id<ID!>)"`
 			}{},
 			Fields: Fields{
 				"fieldTwo": true,
@@ -304,7 +304,7 @@ fieldTwo
 				TestMutation struct {
 					FieldOne string
 					FieldTwo string
-				} `graphql:"testMutation(id:$id<ID!>)"`
+				} `goql:"testMutation(id:$id<ID!>)"`
 			}{},
 			Fields: nil,
 			ExpectedOutput: `mutation($id: ID!) {
@@ -318,7 +318,7 @@ fieldTwo
 			Name: "WithNameOverride",
 			Input: struct {
 				TestMutation struct {
-					FieldOne string `graphql:"FieldOneOverride"`
+					FieldOne string `goql:"FieldOneOverride"`
 					FieldTwo string
 				}
 			}{},
@@ -334,7 +334,7 @@ fieldTwo
 			Name: "WithAlias",
 			Input: struct {
 				TestMutation struct {
-					FieldOne string `graphql:"@alias(fieldOneAlias)"`
+					FieldOne string `goql:"@alias(fieldOneAlias)"`
 					FieldTwo string
 				}
 			}{},
@@ -351,7 +351,7 @@ fieldTwo
 			Input: struct {
 				TestMutation struct {
 					FieldOne string
-					FieldTwo string `graphql:"@skip($ifCondition)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
 				}
 			}{},
 			Fields: nil,
@@ -367,7 +367,7 @@ fieldTwo @skip(if: $ifCondition)
 			Input: struct {
 				TestMutation struct {
 					FieldOne string
-					FieldTwo string `graphql:"@include($ifCondition)"`
+					FieldTwo string `goql:"@include($ifCondition)"`
 				}
 			}{},
 			Fields: nil,
@@ -384,7 +384,7 @@ fieldTwo @include(if: $ifCondition)
 				TestMutation struct {
 					FieldOne string
 					FieldTwo string
-				} `graphql:"keep"`
+				} `goql:"keep"`
 			}{},
 			Fields: Fields{
 				"fieldOne": true,
@@ -399,9 +399,9 @@ fieldOne
 			Name: "Complex",
 			Input: struct {
 				TestMutation struct {
-					FieldOne string `graphql:"@alias(fooBar)"`
-					FieldTwo string `graphql:"@skip($ifCondition)"`
-				} `graphql:"testMutation(id:$id<ID!>)"`
+					FieldOne string `goql:"@alias(fooBar)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
+				} `goql:"testMutation(id:$id<ID!>)"`
 			}{},
 			Fields: nil,
 			ExpectedOutput: `mutation($id: ID!, $ifCondition: Boolean!) {
@@ -415,9 +415,9 @@ fieldTwo @skip(if: $ifCondition)
 			Name: "ComplexWithSparseFieldset",
 			Input: struct {
 				TestMutation struct {
-					FieldOne string `graphql:"@alias(fooBar)"`
-					FieldTwo string `graphql:"@skip($ifCondition)"`
-				} `graphql:"testMutation(id:$id<ID!>)"`
+					FieldOne string `goql:"@alias(fooBar)"`
+					FieldTwo string `goql:"@skip($ifCondition)"`
+				} `goql:"testMutation(id:$id<ID!>)"`
 			}{},
 			Fields: Fields{
 				"fieldTwo": true,
