@@ -1,7 +1,7 @@
 # goql
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/getoutreach/goql.svg)](https://pkg.go.dev/github.com/getoutreach/goql)
-[![CircleCI](https://circleci.com/gh/getoutreach/goql.svg?style=shield&circle-token=<b37cc0386e76b70d4bab8994c68e39c62f293d63:READ:https://circleci.com/docs/2.0/status-badges/>)](https://circleci.com/gh/getoutreach/goql)
+[![CircleCI](https://circleci.com/gh/getoutreach/goql.svg?style=shield&circle-token=b37cc0386e76b70d4bab8994c68e39c62f293d63)](https://circleci.com/gh/getoutreach/goql)
 [![Generated via Bootstrap](https://img.shields.io/badge/Outreach-Bootstrap-%235951ff)](https://github.com/getoutreach/bootstrap)
 
 goql is a GraphQL client library with built-in two-way marshaling support via struct tags. This is key because it allows
