@@ -91,9 +91,9 @@ type DirectiveEnum string
 
 // Directive constants using the DirectiveEnum type.
 const (
-	DirectiveAlias   = DirectiveEnum("alias")
-	DirectiveSkip    = DirectiveEnum("skip")
-	DirectiveInclude = DirectiveEnum("include")
+	directiveAlias   = DirectiveEnum("alias")
+	directiveSkip    = DirectiveEnum("skip")
+	directiveInclude = DirectiveEnum("include")
 )
 
 // Directive is a data structure that represents a directive for a field or model
@@ -289,7 +289,7 @@ func parseTag(tag string) (Field, error) { //nolint:funlen
 				return Field{}, err
 			}
 
-			if dir.Type == DirectiveAlias {
+			if dir.Type == directiveAlias {
 				alias = dir.Template
 				continue
 			}
@@ -365,10 +365,10 @@ func parseDirective(s string) (Directive, error) {
 	}
 
 	switch dir.Type {
-	case DirectiveAlias:
+	case directiveAlias:
 		// there can't be variables in aliases (they're technically not a directive,
 		// it's just easiest to deal with them as if they were one).
-	case DirectiveInclude, DirectiveSkip:
+	case directiveInclude, directiveSkip:
 		if strings.HasPrefix(dir.Template, "$") {
 			dir.Token = Token{
 				Kind: "Boolean!",
