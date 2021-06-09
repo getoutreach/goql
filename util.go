@@ -56,7 +56,7 @@ func toLowerCamelCase(in string) string {
 // stack is a type that contains fields and receiver methods that implement the stack
 // data structure. This data structure is used in the marshaling process.
 type stack struct {
-	items []*Field
+	items []*field
 }
 
 // length returns the length of the stack.
@@ -65,12 +65,12 @@ func (s stack) length() int {
 }
 
 // push pushes a value onto the stack.
-func (s *stack) push(field *Field) { //nolint:gocritic
-	s.items = append(s.items, field)
+func (s *stack) push(f *field) { //nolint:gocritic
+	s.items = append(s.items, f)
 }
 
 // pop pops a value off of the top of the stack.
-func (s *stack) pop() *Field {
+func (s *stack) pop() *field {
 	l := len(s.items)
 	front, items := s.items[l-1], s.items[:l-1]
 	s.items = items
@@ -78,13 +78,13 @@ func (s *stack) pop() *Field {
 }
 
 // top returns the element on top of the stack.
-func (s stack) top() *Field {
+func (s stack) top() *field {
 	return s.items[len(s.items)-1]
 }
 
 // apply allows changes to the element on top of the stack.
-func (s stack) apply(f func(field *Field)) {
+func (s stack) apply(fn func(f *field)) {
 	if len(s.items) > 0 {
-		f(s.items[len(s.items)-1])
+		fn(s.items[len(s.items)-1])
 	}
 }

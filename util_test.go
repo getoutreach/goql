@@ -58,11 +58,11 @@ func TestStack(t *testing.T) {
 	var st stack
 
 	// Test field to be used throughout this test.
-	f := Field{
-		Decl: Declaration{
+	f := field{
+		Decl: declaration{
 			Name:  "user",
 			Alias: "",
-			Tokens: []Token{
+			Tokens: []token{
 				{
 					Kind: "String!",
 					Name: "name",
@@ -71,10 +71,10 @@ func TestStack(t *testing.T) {
 			},
 			Template: "getUser",
 		},
-		Directives: []Directive{
+		Directives: []directive{
 			{
 				Type: "include",
-				Token: Token{
+				Token: token{
 					Kind: "Boolean!",
 					Name: "ifAdmin",
 					Arg:  "ifAdmin",
@@ -116,7 +116,7 @@ func TestStack(t *testing.T) {
 	}
 
 	newDeclTemplate := "getUser2"
-	st.apply(func(f *Field) {
+	st.apply(func(f *field) {
 		f.Decl.Template = newDeclTemplate
 	})
 
@@ -128,11 +128,11 @@ func TestStack(t *testing.T) {
 // BenchmarkStack benchmarks the receiver functions for the stack type.
 func BenchmarkStack(b *testing.B) {
 	var st stack
-	f := Field{
-		Decl: Declaration{
+	f := field{
+		Decl: declaration{
 			Name:  "user",
 			Alias: "",
-			Tokens: []Token{
+			Tokens: []token{
 				{
 					Kind: "String!",
 					Name: "name",
@@ -141,10 +141,10 @@ func BenchmarkStack(b *testing.B) {
 			},
 			Template: "getUser",
 		},
-		Directives: []Directive{
+		Directives: []directive{
 			{
 				Type: "include",
-				Token: Token{
+				Token: token{
 					Kind: "Boolean!",
 					Name: "ifAdmin",
 					Arg:  "ifAdmin",
@@ -159,7 +159,7 @@ func BenchmarkStack(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		st.push(&f)
 		_ = st.top()
-		st.apply(func(f *Field) {
+		st.apply(func(f *field) {
 			f.Decl.Template = "getUser2"
 		})
 		_ = st.pop()

@@ -46,34 +46,34 @@ var (
 // information says.
 const keepTag = "keep"
 
-// Token represents arguments and variables used throughout a GraphQL query.
-type Token struct {
+// token represents arguments and variables used throughout a GraphQL query.
+type token struct {
 	Kind string
 	Name string
 	Arg  string
 }
 
 // tokenize takes a slice of tokens and returns a string representation of them.
-func tokenize(tokens []Token) string {
+func tokenize(tokens []token) string {
 	tn := make([]string, 0, len(tokens))
-	for _, token := range tokens {
-		tn = append(tn, fmt.Sprintf("%s: $%s", token.Name, token.Arg))
+	for _, t := range tokens {
+		tn = append(tn, fmt.Sprintf("%s: $%s", t.Name, t.Arg))
 	}
 	return strings.Join(tn, ", ")
 }
 
-// Declaration is a data structure that represents a field or model in a GraphQL
+// declaration is a data structure that represents a field or model in a GraphQL
 // operation.
-type Declaration struct {
+type declaration struct {
 	Name     string
 	Alias    string
-	Tokens   []Token
+	Tokens   []token
 	Template string
 }
 
-// Tokenize is a receiver function of the Declaration type which takes the information
+// tokenize is a receiver function of the Declaration type which takes the information
 // contained within and writes it to any type that implements the io.Writer interface.
-func (d Declaration) Tokenize(w io.Writer) {
+func (d declaration) tokenize(w io.Writer) {
 	if d.Alias != "" {
 		fmt.Fprintf(w, "%s: ", d.Alias) //nolint:errcheck
 	}
@@ -85,36 +85,36 @@ func (d Declaration) Tokenize(w io.Writer) {
 	io.WriteString(w, d.Name) //nolint:errcheck
 }
 
-// DirectiveEnum is an alias to a string that has distinct constant values defined
+// directiveEnum is an alias to a string that has distinct constant values defined
 // for it allowing it to act as if it were a classic enum.
-type DirectiveEnum string
+type directiveEnum string
 
 // Directive constants using the DirectiveEnum type.
 const (
-	directiveAlias   = DirectiveEnum("alias")
-	directiveSkip    = DirectiveEnum("skip")
-	directiveInclude = DirectiveEnum("include")
+	directiveAlias   = directiveEnum("alias")
+	directiveSkip    = directiveEnum("skip")
+	directiveInclude = directiveEnum("include")
 )
 
-// Directive is a data structure that represents a directive for a field or model
+// directive is a data structure that represents a directive for a field or model
 // in a GraphQL operation.
-type Directive struct {
-	Type     DirectiveEnum
-	Token    Token
+type directive struct {
+	Type     directiveEnum
+	Token    token
 	Template string
 }
 
-// Tokenize is a receiver function of the Directive type which takes the information
+// tokenize is a receiver function of the Directive type which takes the information
 // contained within and writes it to any type that implements the io.Writer interface.
-func (d *Directive) Tokenize(w io.Writer) {
+func (d *directive) tokenize(w io.Writer) {
 	fmt.Fprintf(w, "@%s(if: $%s)", d.Type, d.Token.Arg) //nolint:errcheck
 }
 
-// Field is a data structure that represents a field or model in a GraphQL query.
-type Field struct {
-	Decl       Declaration
-	Directives []Directive
-	Fields     []Field
+// field is a data structure that represents a field or model in a GraphQL query.
+type field struct {
+	Decl       declaration
+	Directives []directive
+	Fields     []field
 
 	// Keep, if set to true, tells the marshaling process to ignore whatever is
 	// contained in the sparse fieldset information about the current field and
@@ -123,22 +123,22 @@ type Field struct {
 	Keep bool
 }
 
-// Tokens recurses through a field to gather all tokens contained within the root
+// tokens recurses through a field to gather all tokens contained within the root
 // field as well as all of it's children fields.
-func (f *Field) Tokens() []Token {
-	var tokens []Token
+func (f *field) tokens() []token {
+	var tokens []token
 
 	// Get the tokens from the declaration and directives of the current token.
 	tokens = append(tokens, f.Decl.Tokens...)
 	for _, directive := range f.Directives {
-		if (directive.Token != Token{}) {
+		if (directive.Token != token{}) {
 			tokens = append(tokens, directive.Token)
 		}
 	}
 
 	// Recurse through children tokens.
 	for _, field := range f.Fields {
-		tokens = append(tokens, field.Tokens()...)
+		tokens = append(tokens, field.tokens()...)
 	}
 
 	return tokens
@@ -149,7 +149,7 @@ func (f *Field) Tokens() []Token {
 // "$<arg>: <Type>" which can be joined by strings.Join(args, ", ") to render the correct
 // format to pass to either query(...) or mutation(...) at the top-level of a GraphQL
 // operation.
-func argsFromTokens(tokens []Token) ([]string, error) {
+func argsFromTokens(tokens []token) ([]string, error) {
 	// len(tokens) might be too big, but it's at least the max size it could be.
 	argsMap := make(map[string]string, len(tokens))
 
@@ -177,12 +177,12 @@ func argsFromTokens(tokens []Token) ([]string, error) {
 	return args, nil
 }
 
-// Tokenize recurses through a field to write all of the information contained
+// tokenize recurses through a field to write all of the information contained
 // within the root field as well as all of it's children field to any type that
 // implements the io.Writer interface.
 //
 // Returns a bool denoting whether or not the field was written and an error.
-func (f *Field) Tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:gocyclo
+func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:gocyclo
 	var write bool
 
 	if f.Keep || fields == nil {
@@ -210,16 +210,16 @@ func (f *Field) Tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:go
 	}
 
 	if write {
-		f.Decl.Tokenize(w)
+		f.Decl.tokenize(w)
 		for _, directive := range f.Directives {
 			io.WriteString(w, " ") //nolint:errcheck
-			directive.Tokenize(w)
+			directive.tokenize(w)
 		}
 
 		if len(f.Fields) > 0 {
 			io.WriteString(w, " {\n") //nolint:errcheck
 			for _, field := range f.Fields {
-				written, err := field.Tokenize(w, fields)
+				written, err := field.tokenize(w, fields)
 				if err != nil {
 					return false, err
 				}
@@ -266,8 +266,8 @@ func splitTag(tag string) []string {
 
 // parseTag takes the value of a graphql tag and parses it into various declarations
 // and directives.
-func parseTag(tag string) (Field, error) { //nolint:funlen
-	var field Field
+func parseTag(tag string) (field, error) { //nolint:funlen
+	var f field
 	var alias string
 
 	for _, item := range splitTag(tag) {
@@ -279,14 +279,14 @@ func parseTag(tag string) (Field, error) { //nolint:funlen
 		case reName.MatchString(item) && item != keepTag:
 			// The explicit check that the string isn't a keep tag is necessary
 			// because reName matches the string "keep". This might be a problem?
-			field.Decl = Declaration{Name: item}
+			f.Decl = declaration{Name: item}
 		case reDecl.MatchString(item):
-			field.Decl = parseDecl(item)
-			field.Keep = true
+			f.Decl = parseDecl(item)
+			f.Keep = true
 		case reDirective.MatchString(item):
 			dir, err := parseDirective(item)
 			if err != nil {
-				return Field{}, err
+				return field{}, err
 			}
 
 			if dir.Type == directiveAlias {
@@ -294,38 +294,38 @@ func parseTag(tag string) (Field, error) { //nolint:funlen
 				continue
 			}
 
-			field.Directives = append(field.Directives, dir)
+			f.Directives = append(f.Directives, dir)
 		case item == keepTag:
-			field.Keep = true
+			f.Keep = true
 		default:
-			return Field{}, fmt.Errorf("failed to parse tag \"%s\"", tag)
+			return field{}, fmt.Errorf("failed to parse tag \"%s\"", tag)
 		}
 	}
 
-	field.Decl.Alias = alias
+	f.Decl.Alias = alias
 
 	// sort directives to check for duplication
-	sort.Slice(field.Directives, func(i, j int) bool {
-		return field.Directives[i].Type < field.Directives[j].Type
+	sort.Slice(f.Directives, func(i, j int) bool {
+		return f.Directives[i].Type < f.Directives[j].Type
 	})
 
 	// check for duplicate directives
 	j := 0
-	for i := 1; i < len(field.Directives); i++ {
-		x, y := &field.Directives[i], field.Directives[j]
+	for i := 1; i < len(f.Directives); i++ {
+		x, y := &f.Directives[i], f.Directives[j]
 		if x.Type == y.Type {
-			return Field{}, fmt.Errorf("duplicate directive in tag \"%s\"", x.Type)
+			return field{}, fmt.Errorf("duplicate directive in tag \"%s\"", x.Type)
 		}
 		j++
 	}
 
-	return field, nil
+	return f, nil
 }
 
 // parseDecl takes a declaration retrieved from a graphql struct tag and parses it
 // into a Declaration.
-func parseDecl(s string) Declaration {
-	var tokens []Token
+func parseDecl(s string) declaration {
+	var tokens []token
 
 	matches := reDecl.FindStringSubmatch(s)
 	name := matches[reDeclName]
@@ -333,7 +333,7 @@ func parseDecl(s string) Declaration {
 	params := strings.Trim(matches[reDeclArgs], "()")
 	paramMatches := reParam.FindAllStringSubmatch(params, -1)
 	for _, match := range paramMatches {
-		tokens = append(tokens, Token{
+		tokens = append(tokens, token{
 			Kind: match[reParamKind],
 			Name: match[reParamName],
 			Arg:  match[reParamArg],
@@ -347,7 +347,7 @@ func parseDecl(s string) Declaration {
 		return param
 	})
 
-	return Declaration{
+	return declaration{
 		Name:     name,
 		Tokens:   tokens,
 		Template: template,
@@ -356,11 +356,11 @@ func parseDecl(s string) Declaration {
 
 // parseDirective takes a declaration retrieved from a graphql struct tag and parses it
 // into a Directive.
-func parseDirective(s string) (Directive, error) {
+func parseDirective(s string) (directive, error) {
 	matches := reDirective.FindStringSubmatch(s)
 
-	dir := Directive{
-		Type:     DirectiveEnum(matches[reDirectiveName]),
+	dir := directive{
+		Type:     directiveEnum(matches[reDirectiveName]),
 		Template: strings.Trim(matches[reDirectiveArg], "()"),
 	}
 
@@ -370,38 +370,38 @@ func parseDirective(s string) (Directive, error) {
 		// it's just easiest to deal with them as if they were one).
 	case directiveInclude, directiveSkip:
 		if strings.HasPrefix(dir.Template, "$") {
-			dir.Token = Token{
+			dir.Token = token{
 				Kind: "Boolean!",
 				Arg:  dir.Template[1:],
 			}
 		}
 	default:
-		return Directive{}, fmt.Errorf("unknown directive in tag \"%s\"", dir.Type)
+		return directive{}, fmt.Errorf("unknown directive in tag \"%s\"", dir.Type)
 	}
 
 	return dir, nil
 }
 
-// Node represents any given struct type or it's fields.
-type Node struct {
+// node represents any given struct type or it's fields.
+type node struct {
 	Name string
 	Type reflect.Type
 	Tag  string
 }
 
-// Visit defines a function signature used when "visiting" each node in a tree
+// visit defines a function signature used when "visiting" each node in a tree
 // of nodes.
-type Visit func(node *Node) error
+type visit func(n *node) error
 
 // structNode ensures a given type is a struct type and resolves it to a node.
-func structNode(s interface{}) (Node, error) {
+func structNode(s interface{}) (node, error) {
 	st := deref(reflect.TypeOf(s))
 
 	if st.Kind() != reflect.Struct {
-		return Node{}, fmt.Errorf("expecting struct type, got %s", st.Kind())
+		return node{}, fmt.Errorf("expecting struct type, got %s", st.Kind())
 	}
 
-	return Node{
+	return node{
 		Name: st.Name(),
 		Type: st,
 	}, nil
@@ -409,8 +409,8 @@ func structNode(s interface{}) (Node, error) {
 
 // listFields takes a reflect.Type parameter that should be a struct type and resolves
 // all of it's fields into nodes.
-func listFields(st reflect.Type) []Node {
-	fields := make([]Node, 0, st.NumField())
+func listFields(st reflect.Type) []node {
+	fields := make([]node, 0, st.NumField())
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
 
@@ -424,7 +424,7 @@ func listFields(st reflect.Type) []Node {
 			continue
 		}
 
-		fields = append(fields, Node{
+		fields = append(fields, node{
 			Name: field.Name,
 			Type: deref(field.Type),
 			Tag:  tag,
@@ -433,43 +433,43 @@ func listFields(st reflect.Type) []Node {
 	return fields
 }
 
-// walk performs the visit function on the passed in node and each of its children,
+// walker performs the visit function on the passed in node and each of its children,
 // recursively.
-func walk(node Node, visit Visit) error {
+func walker(n node, visitFn visit) error {
 	// Visit the current node.
-	if err := visit(&node); err != nil {
+	if err := visitFn(&n); err != nil {
 		return err
 	}
 
 	// Tell visit we're done with this node and it's children nodes.
 	defer func() {
 		// this will never error when nil is passed
-		_ = visit(nil) //nolint:errcheck
+		_ = visitFn(nil) //nolint:errcheck
 	}()
 
-	switch node.Type.Kind() { //nolint:exhaustive
+	switch n.Type.Kind() { //nolint:exhaustive
 	case reflect.Struct:
-		for _, field := range listFields(node.Type) {
-			if err := walk(field, visit); err != nil {
+		for _, field := range listFields(n.Type) {
+			if err := walker(field, visitFn); err != nil {
 				return err
 			}
 		}
 	case reflect.Slice, reflect.Array, reflect.Ptr:
-		t := deref(node.Type.Elem())
-		n := Node{
+		t := deref(n.Type.Elem())
+		n := node{
 			Name: t.Name(),
 			Type: t,
 		}
 
 		if t.Kind() == reflect.Struct {
 			for _, field := range listFields(n.Type) {
-				if err := walk(field, visit); err != nil {
+				if err := walker(field, visitFn); err != nil {
 					return err
 				}
 			}
 			break
 		}
-		if err := walk(n, visit); err != nil {
+		if err := walker(n, visitFn); err != nil {
 			return err
 		}
 	default:
@@ -478,15 +478,15 @@ func walk(node Node, visit Visit) error {
 	return nil
 }
 
-// Walk takes a struct type and a Visit function and walks through the entire type
+// walk takes a struct type and a Visit function and walks through the entire type
 // performing the Visit function on each field.
-func Walk(s interface{}, visit Visit) error {
+func walk(s interface{}, visit visit) error {
 	n, err := structNode(s)
 	if err != nil {
 		return err
 	}
 
-	return walk(n, visit)
+	return walker(n, visit)
 }
 
 // deref dereferences a reflection type if it is a pointer, double pointer, etc.
@@ -520,13 +520,13 @@ var cache sync.Map
 // GraphQL operation will be returned ("query" or "mutation", although this is not
 // explicitly checked since this function is only called from within this package).
 func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //nolint:funlen
-	var operation *Field
+	var operation *field
 	rt := reflect.TypeOf(q)
 
 	// Check to see if this type has already been built.
 	if cachedOperation, hit := cache.Load(rt); hit {
 		// Cache hit, use the tree that was already built.
-		operation = cachedOperation.(*Field)
+		operation = cachedOperation.(*field)
 	} else {
 		// Not in cache, need to build by walking through the type and then store it in the
 		// cache for later use.
@@ -535,17 +535,17 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 		// The visit func that gets passed to Walk handles the stack management while walking
 		// through the root node and all of it's children to create the declarations, directives,
 		// and their tokens which are used to create the GraphQL operation.
-		visit := func(node *Node) error {
-			if node != nil {
-				field, err := parseTag(node.Tag)
+		visitFn := func(n *node) error {
+			if n != nil {
+				f, err := parseTag(n.Tag)
 				if err != nil {
 					return err
 				}
 
-				if field.Decl.Name == "" {
-					field.Decl.Name = toLowerCamelCase(node.Name)
+				if f.Decl.Name == "" {
+					f.Decl.Name = toLowerCamelCase(n.Name)
 				}
-				st.push(&field)
+				st.push(&f)
 			} else {
 				// don't pop the root node
 				if st.length() == 1 {
@@ -553,9 +553,9 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 				}
 
 				// add most recent node to parent
-				field := st.pop()
-				st.apply(func(f *Field) {
-					f.Fields = append(f.Fields, *field)
+				nf := st.pop()
+				st.apply(func(f *field) {
+					f.Fields = append(f.Fields, *nf)
 				})
 			}
 
@@ -563,7 +563,7 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 		}
 
 		// Walk through the given struct.
-		if err := Walk(q, visit); err != nil {
+		if err := walk(q, visitFn); err != nil {
 			return "", err
 		}
 
@@ -576,7 +576,7 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 	}
 
 	// Get the args from the tokens contained in operation and it's children.
-	args, err := argsFromTokens(operation.Tokens())
+	args, err := argsFromTokens(operation.tokens())
 	if err != nil {
 		return "", err
 	}
@@ -598,7 +598,7 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 	var b strings.Builder
 
 	// Construct the actual operation from the fields gathered while walking through q's nodes.
-	if _, err := operation.Tokenize(&b, fields); err != nil {
+	if _, err := operation.tokenize(&b, fields); err != nil {
 		return "", err
 	}
 

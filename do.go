@@ -33,8 +33,8 @@ type Operation struct {
 	Variables     map[string]interface{}
 }
 
-// Request is the type that contains the structure of a request that a GraphQL server expects.
-type Request struct {
+// request is the type that contains the structure of a request that a GraphQL server expects.
+type request struct {
 	Query     string                 `json:"query"`
 	Variables map[string]interface{} `json:"variables"`
 }
@@ -63,8 +63,8 @@ func (e Errors) Error() string {
 	return strings.Join(errs, ", ")
 }
 
-// Response is the type that contains the structure of a response from a GraphQL server.
-type Response struct {
+// response is the type that contains the structure of a response from a GraphQL server.
+type response struct {
 	// Data uses json.RawMessage to delay decoding of itself since we don't
 	// know the type of it at compile time.
 	Data   json.RawMessage `json:"data"`
@@ -79,7 +79,7 @@ func (c *Client) doCustom(ctx context.Context, query string, variables map[strin
 	var buf bytes.Buffer
 
 	// Create the request body using the constructed query or mutation.
-	if err := json.NewEncoder(&buf).Encode(Request{ //nolint:gocritic
+	if err := json.NewEncoder(&buf).Encode(request{ //nolint:gocritic
 		Query:     query,
 		Variables: variables,
 	}); err != nil {
@@ -125,7 +125,7 @@ func (c *Client) doStruct(ctx context.Context, operationType int, operation *Ope
 
 	// Create the request body using the constructed query or mutation.
 	var buf bytes.Buffer
-	if err = json.NewEncoder(&buf).Encode(Request{ //nolint:gocritic
+	if err = json.NewEncoder(&buf).Encode(request{ //nolint:gocritic
 		Query:     queryStr,
 		Variables: operation.Variables,
 	}); err != nil {
@@ -189,7 +189,7 @@ func (c *Client) do(ctx context.Context, body io.Reader, headers http.Header) (j
 		}
 	}()
 
-	var gqlResp Response
+	var gqlResp response
 
 	// Create two copies from the response buffer, one to decode and one to fall back on if the decoding
 	// fails for any reason.
