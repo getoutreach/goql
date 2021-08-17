@@ -141,11 +141,7 @@ func (c *Client) doStruct(ctx context.Context, operationType int, operation *Ope
 
 	// Unmarshal the "data" key of the response into the desired struct that was passed in
 	// by reference.
-	if err := json.Unmarshal(data, operation.OperationType); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(data, operation.OperationType)
 }
 
 // do performs a GraphQL operation given a request body and headers. The "data" key of the
