@@ -55,7 +55,9 @@ jobs:
             # see https://outreach-io.atlassian.net/wiki/spaces/EN/pages/701596137/Services+Checklist for the setup process
             - add_ssh_keys
             - checkout
-            - run: mkdir -p $TEST_RESULTS # create the test results directory
+            - run:
+                name: Ensure tests directory exists
+                command: mkdir -p "$TEST_RESULTS"
 
             - restore_cache: # restores saved cache if no changes are detected since last run
                 # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
