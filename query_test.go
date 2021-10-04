@@ -241,6 +241,88 @@ fieldTwo @skip(if: $ifCondition)
 }
 }`,
 		},
+		{
+			Name: "WithNestedStruct",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					NestedField struct {
+						NestedFieldOne string
+						NestedFieldTwo string
+					}
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: nil,
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+nestedFieldTwo
+}
+}
+}`,
+		},
+		{
+			Name: "WithNestedStructAndSparseFieldset",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						NestedFieldOne   string
+						NestedFieldTwo   string
+						NestedFieldThree string
+					}
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"nestedFieldOne": true,
+				},
+			},
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+}
+}
+}`,
+		},
+		{
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					NestedField struct {
+						NestedFieldOne   string `goql:"keep"`
+						NestedFieldTwo   string
+						NestedFieldThree string
+					} `goql:"keep"`
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+			},
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+}
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -425,6 +507,88 @@ fieldTwo @skip(if: $ifCondition)
 			ExpectedOutput: `mutation($id: ID!, $ifCondition: Boolean!) {
 testMutation(id: $id) {
 fieldTwo @skip(if: $ifCondition)
+}
+}`,
+		},
+		{
+			Name: "WithNestedStruct",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					NestedField struct {
+						NestedFieldOne string
+						NestedFieldTwo string
+					}
+				} `goql:"testMutation(id:$id<ID!>)"`
+			}{},
+			Fields: nil,
+			ExpectedOutput: `mutation($id: ID!) {
+testMutation(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+nestedFieldTwo
+}
+}
+}`,
+		},
+		{
+			Name: "WithNestedStructAndSparseFieldset",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						NestedFieldOne   string
+						NestedFieldTwo   string
+						NestedFieldThree string
+					}
+				} `goql:"testMutation(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"nestedFieldOne": true,
+				},
+			},
+			ExpectedOutput: `mutation($id: ID!) {
+testMutation(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+}
+}
+}`,
+		},
+		{
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					NestedField struct {
+						NestedFieldOne   string `goql:"keep"`
+						NestedFieldTwo   string
+						NestedFieldThree string
+					} `goql:"keep"`
+				} `goql:"testMutation(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+			},
+			ExpectedOutput: `mutation($id: ID!) {
+testMutation(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+nestedFieldOne
+}
 }
 }`,
 		},
