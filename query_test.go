@@ -323,6 +323,38 @@ nestedFieldOne
 }
 }`,
 		},
+		{
+			Name: "",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						FieldOne string
+						FieldTwo string
+						FieldXYZ string
+						FieldABC string `goql:"keep"`
+					} `goql:"keep"`
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"fieldXYZ": true,
+				},
+			},
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+fieldXYZ
+}
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
