@@ -324,7 +324,7 @@ nestedFieldOne
 }`,
 		},
 		{
-			Name: "",
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTagWithNestedFieldsIncluded",
 			Input: struct {
 				TestQuery struct {
 					FieldOne    string
@@ -375,13 +375,24 @@ fieldXYZ
 
 			trimmedExpectedOutput, trimmedActualOutput := strings.TrimSpace(test.ExpectedOutput), strings.TrimSpace(actualOutput)
 
+			// logOutput is a flag that denotes whether or not we should log the output based off of
+			// whether or not either of our checks for failure fired.
+			var logOutput bool
+
 			if e, a := len(trimmedExpectedOutput), len(trimmedActualOutput); e != a {
+				logOutput = true
 				t.Errorf("expected length of output to be %d, got %d", e, a)
 			}
 
 			percentMatch := percentageMatch(trimmedExpectedOutput, trimmedActualOutput)
 			if percentMatch < minPercentageMatch {
+				logOutput = true
 				t.Errorf("expected percentage match to be %f, got %f", minPercentageMatch, percentMatch)
+			}
+
+			if logOutput {
+				t.Logf("expected:\n%s\n", trimmedExpectedOutput)
+				t.Logf("actual:\n%s\n", trimmedActualOutput)
 			}
 		}
 		t.Run(test.Name, fn)
@@ -624,6 +635,38 @@ nestedFieldOne
 }
 }`,
 		},
+		{
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTagWithNestedFieldsIncluded",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						FieldOne string
+						FieldTwo string
+						FieldXYZ string
+						FieldABC string `goql:"keep"`
+					} `goql:"keep"`
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"fieldXYZ": true,
+				},
+			},
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+fieldXYZ
+}
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -644,13 +687,24 @@ nestedFieldOne
 
 			trimmedExpectedOutput, trimmedActualOutput := strings.TrimSpace(test.ExpectedOutput), strings.TrimSpace(actualOutput)
 
+			// logOutput is a flag that denotes whether or not we should log the output based off of
+			// whether or not either of our checks for failure fired.
+			var logOutput bool
+
 			if e, a := len(trimmedExpectedOutput), len(trimmedActualOutput); e != a {
+				logOutput = true
 				t.Errorf("expected length of output to be %d, got %d", e, a)
 			}
 
 			percentMatch := percentageMatch(trimmedExpectedOutput, trimmedActualOutput)
 			if percentMatch < minPercentageMatch {
+				logOutput = true
 				t.Errorf("expected percentage match to be %f, got %f", minPercentageMatch, percentMatch)
+			}
+
+			if logOutput {
+				t.Logf("expected:\n%s\n", trimmedExpectedOutput)
+				t.Logf("actual:\n%s\n", trimmedActualOutput)
 			}
 		}
 		t.Run(test.Name, fn)

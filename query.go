@@ -187,7 +187,7 @@ func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:go
 
 	if f.Keep || fields == nil {
 		write = true
-	} else if desired, exists := fields[f.Decl.Name]; exists {
+	} else if desired, exists := fields[f.Decl.Name]; exists { // this is probably the offending line
 		switch ts := desired.(type) {
 		case bool:
 			if ts {
