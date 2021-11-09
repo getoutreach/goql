@@ -351,6 +351,7 @@ fieldOne
 fieldTwo
 nestedField {
 fieldXYZ
+fieldABC
 }
 }
 }`,
@@ -361,7 +362,7 @@ fieldXYZ
 		test := test
 
 		fn := func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel()
 
 			actualOutput, err := MarshalQuery(test.Input, test.Fields)
 			if err != nil {
@@ -556,7 +557,7 @@ fieldTwo @skip(if: $ifCondition)
 		{
 			Name: "WithNestedStruct",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					NestedField struct {
@@ -580,7 +581,7 @@ nestedFieldTwo
 		{
 			Name: "WithNestedStructAndSparseFieldset",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					FieldThree  string
@@ -611,7 +612,7 @@ nestedFieldOne
 		{
 			Name: "WithNestedStructAndSparseFieldsetAndKeepTag",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					NestedField struct {
@@ -638,7 +639,7 @@ nestedFieldOne
 		{
 			Name: "WithNestedStructAndSparseFieldsetAndKeepTagWithNestedFieldsIncluded",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					FieldThree  string
@@ -648,7 +649,7 @@ nestedFieldOne
 						FieldXYZ string
 						FieldABC string `goql:"keep"`
 					} `goql:"keep"`
-				} `goql:"testQuery(id:$id<ID!>)"`
+				} `goql:"testMutation(id:$id<ID!>)"`
 			}{},
 			Fields: Fields{
 				"fieldOne": true,
@@ -657,12 +658,13 @@ nestedFieldOne
 					"fieldXYZ": true,
 				},
 			},
-			ExpectedOutput: `query($id: ID!) {
-testQuery(id: $id) {
+			ExpectedOutput: `mutation($id: ID!) {
+testMutation(id: $id) {
 fieldOne
 fieldTwo
 nestedField {
 fieldXYZ
+fieldABC
 }
 }
 }`,
