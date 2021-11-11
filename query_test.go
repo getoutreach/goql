@@ -323,6 +323,39 @@ nestedFieldOne
 }
 }`,
 		},
+		{
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTagWithNestedFieldsIncluded",
+			Input: struct {
+				TestQuery struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						FieldOne string
+						FieldTwo string
+						FieldXYZ string
+						FieldABC string `goql:"keep"`
+					} `goql:"keep"`
+				} `goql:"testQuery(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"fieldXYZ": true,
+				},
+			},
+			ExpectedOutput: `query($id: ID!) {
+testQuery(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+fieldXYZ
+fieldABC
+}
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -513,7 +546,7 @@ fieldTwo @skip(if: $ifCondition)
 		{
 			Name: "WithNestedStruct",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					NestedField struct {
@@ -537,7 +570,7 @@ nestedFieldTwo
 		{
 			Name: "WithNestedStructAndSparseFieldset",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					FieldThree  string
@@ -568,7 +601,7 @@ nestedFieldOne
 		{
 			Name: "WithNestedStructAndSparseFieldsetAndKeepTag",
 			Input: struct {
-				TestQuery struct {
+				TestMutation struct {
 					FieldOne    string
 					FieldTwo    string
 					NestedField struct {
@@ -588,6 +621,39 @@ fieldOne
 fieldTwo
 nestedField {
 nestedFieldOne
+}
+}
+}`,
+		},
+		{
+			Name: "WithNestedStructAndSparseFieldsetAndKeepTagWithNestedFieldsIncluded",
+			Input: struct {
+				TestMutation struct {
+					FieldOne    string
+					FieldTwo    string
+					FieldThree  string
+					NestedField struct {
+						FieldOne string
+						FieldTwo string
+						FieldXYZ string
+						FieldABC string `goql:"keep"`
+					} `goql:"keep"`
+				} `goql:"testMutation(id:$id<ID!>)"`
+			}{},
+			Fields: Fields{
+				"fieldOne": true,
+				"fieldTwo": true,
+				"nestedField": Fields{
+					"fieldXYZ": true,
+				},
+			},
+			ExpectedOutput: `mutation($id: ID!) {
+testMutation(id: $id) {
+fieldOne
+fieldTwo
+nestedField {
+fieldXYZ
+fieldABC
 }
 }
 }`,

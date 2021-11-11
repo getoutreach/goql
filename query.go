@@ -177,62 +177,112 @@ func argsFromTokens(tokens []token) ([]string, error) {
 	return args, nil
 }
 
+// tokenizeWithFields recurses through a field to write all of the information
+// contained within the root field as well as all of it's children field to any
+// type that implements the io.Writer interface. Unlike tokenize method,
+// tokenizeWithFields only writes the data of a field if the declared name of
+// the latter exist in the passed fieldset or if the field has the tag `keep`
+// switched on.
+//
+// Returns a bool denoting whether or not the field was written and an error.
+func (f *field) tokenizeWithFields(w io.Writer, fields interface{}) (bool, error) { //nolint:funlen
+	var write bool
+
+	switch ts := fields.(type) {
+	case bool:
+		write = ts
+		if len(f.Fields) > 0 {
+			return false, fmt.Errorf("field %s set to true in sparse fieldset map has children fields, needs submap for children fields", f.Decl.Name)
+		}
+	case Fields:
+		write = true
+		if len(f.Fields) == 0 {
+			return false, fmt.Errorf("field %s set to a submap of fields in sparse fieldset map has no children fields, needs to be set to true or false", f.Decl.Name)
+		}
+	default:
+		// Include case when fields equals nil
+		write = false
+	}
+
+	if f.Keep {
+		write = true
+	}
+
+	if !write {
+		return false, nil
+	}
+
+	f.Decl.tokenize(w)
+	for _, directive := range f.Directives {
+		io.WriteString(w, " ") //nolint:errcheck
+		directive.tokenize(w)
+	}
+
+	if len(f.Fields) > 0 {
+		io.WriteString(w, " {\n") //nolint:errcheck
+
+		for _, field := range f.Fields {
+			var written bool
+			var err error
+
+			switch ts := fields.(type) {
+			case Fields:
+				written, err = field.tokenizeWithFields(w, ts[field.Decl.Name])
+			default:
+				written, err = field.tokenizeWithFields(w, nil)
+			}
+
+			if err != nil {
+				return false, err
+			}
+
+			if written {
+				io.WriteString(w, "\n") //nolint:errcheck
+			}
+		}
+		io.WriteString(w, "}") //nolint:errcheck
+	}
+
+	return write, nil
+}
+
 // tokenize recurses through a field to write all of the information contained
 // within the root field as well as all of it's children field to any type that
 // implements the io.Writer interface.
 //
 // Returns a bool denoting whether or not the field was written and an error.
 func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:gocyclo
-	var write bool
-
-	if f.Keep || fields == nil {
-		write = true
-	} else if desired, exists := fields[f.Decl.Name]; exists {
-		switch ts := desired.(type) {
-		case bool:
-			if ts {
-				write = true
-
-				if len(f.Fields) > 0 {
-					return false, fmt.Errorf("field %s set to true in sparse fieldset map has children fields, needs submap for children fields", f.Decl.Name)
-				}
-			}
-		case Fields:
-			if len(f.Fields) == 0 {
-				return false, fmt.Errorf("field %s set to a submap of fields in sparse fieldset map has no children fields, needs to be set to true or false", f.Decl.Name)
-			}
-
-			write = true
-			fields = ts
-		default:
-			write = false
-		}
+	f.Decl.tokenize(w)
+	for _, directive := range f.Directives {
+		io.WriteString(w, " ") //nolint:errcheck
+		directive.tokenize(w)
 	}
 
-	if write {
-		f.Decl.tokenize(w)
-		for _, directive := range f.Directives {
-			io.WriteString(w, " ") //nolint:errcheck
-			directive.tokenize(w)
-		}
+	var written bool
+	var err error
 
-		if len(f.Fields) > 0 {
-			io.WriteString(w, " {\n") //nolint:errcheck
-			for _, field := range f.Fields {
-				written, err := field.tokenize(w, fields)
-				if err != nil {
-					return false, err
-				}
+	if len(f.Fields) > 0 {
+		io.WriteString(w, " {\n") //nolint:errcheck
 
-				if written {
-					io.WriteString(w, "\n") //nolint:errcheck
-				}
+		for _, field := range f.Fields {
+			if fields == nil {
+				written, err = field.tokenize(w, nil)
+			} else {
+				written, err = field.tokenizeWithFields(w, fields)
 			}
-			io.WriteString(w, "}") //nolint:errcheck
+
+			if err != nil {
+				return false, err
+			}
+
+			if written {
+				io.WriteString(w, "\n") //nolint:errcheck
+			}
 		}
+		io.WriteString(w, "}") //nolint:errcheck
 	}
 
-	return write, nil
+	return true, nil
 }
 
 // splitTag takes a tag and splits it into directives and declarations.
@@ -584,10 +634,6 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 	// The top-level declaration will be the name of the struct (q), we don't need that. We
 	// need either "query" or "mutation" at the root-level of the operation.
 	operation.Decl.Name = wrapper
-
-	// Explicitly set the root node to keep because we need it to build the rest of the query,
-	// regardless of the sparse fieldset instructions passed via the fields parameter.
-	operation.Keep = true
 
 	// If there are arguments, add them to the root-level "query" or "mutation" operation identifier
 	// within parenthesis.
