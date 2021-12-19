@@ -1,7 +1,6 @@
 version: 2.1
-
 orbs:
-  shared: getoutreach/shared@1.30.6
+  shared: getoutreach/shared@1.38.1
 
 # DEPRECATED: Use the devbase orb instead:
 # https://github.com/getoutreach/devbase/tree/main/orbs/shared
@@ -23,9 +22,8 @@ jobs:
   test:
     executor:
       name: shared/testbed-docker
-      go_version: 1.17.1
     docker:
-      - image: gcr.io/outreach-docker/bootstrap/testbed:1.17.1
+      - image: gcr.io/outreach-docker/bootstrap/ci:stable
         auth:
           username: _json_key
           password: $GCLOUD_SERVICE_ACCOUNT
@@ -33,8 +31,7 @@ jobs:
       ###Block(testEnvVars)
       ###EndBlock(testEnvVars)
     steps:
-      - shared/setup_environment:
-          setup_remote_docker: true
+      - shared/setup_environment
       - run:
           name: Wait for Infrastructure to be Ready
           command: ./scripts/shell-wrapper.sh ci/testing/wait-for-infra.sh
@@ -52,10 +49,9 @@ jobs:
   release-dryrun:
     executor:
       name: shared/testbed-docker
-      go_version: 1.17.1
+      docker_tag: stable
     steps:
-      - shared/setup_environment:
-          setup_remote_docker: true
+      - shared/setup_environment
       - shared/with_node_cache:
           save: true
       - run:
@@ -64,20 +60,19 @@ jobs:
   release:
     executor:
       name: shared/testbed-docker
-      go_version: 1.17.1
+      docker_tag: stable
     steps:
-      - shared/setup_environment:
-          setup_remote_docker: true
+      - shared/setup_environment
       - shared/with_node_cache:
           save: true
       - run:
           name: Release
-          command: GH_TOKEN=$OUTREACH_GITHUB_TOKEN yarn --frozen-lockfile semantic-release
+          command: ./scripts/shell-wrapper.sh ci/release/release.sh
 
   trigger_documentation:
     executor:
       name: shared/testbed-docker
-      go_version: 1.17.1
+      docker_tag: stable
     steps:
       - shared/setup_environment
       - shared/with_go_cache
@@ -97,6 +92,8 @@ workflows:
           context:
             - docker-registry
             - npm-credentials
+            - ghaccesstoken
+            - package-cloud-credentials
           requires:
             - test
           ###Block(circleReleaseRequires)
@@ -110,6 +107,8 @@ workflows:
           context:
             - docker-registry
             - npm-credentials
+            - ghaccesstoken
+            - package-cloud-credentials
           filters:
             branches:
               ignore:
@@ -117,10 +116,12 @@ workflows:
                 - main
       - test:
           context:
+            - ghaccesstoken
             - docker-registry
             - npm-credentials
       - trigger_documentation:
           context:
+            - ghaccesstoken
             - docker-registry
           filters:
             branches:
