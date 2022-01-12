@@ -72,7 +72,8 @@ func TestNewClient(t *testing.T) {
 					t.Errorf("expected client's http client timeout to be \"%s\", got \"%s\"", e.String(), a.String())
 				}
 
-				if e, a := test.SpecificErrorFromMapper.Error(), client.errorMapper(http.StatusBadRequest, test.SpecificErrorFromMapper.(Errors)).Error(); e != a {
+				if e, a := test.SpecificErrorFromMapper.Error(), client.errorMapper(http.StatusBadRequest,
+					test.SpecificErrorFromMapper.(Errors)).Error(); e != a {
 					t.Errorf("expected error returned from error mapper to be \"%s\", got \"%s\"", e, a)
 				}
 
@@ -212,7 +213,8 @@ func TestCustomOperationWithHeaders(t *testing.T) {
 	}
 	headers := http.Header{}
 
-	if err := client.CustomOperationWithHeaders(context.Background(), testQuery, testOperation.Variables(), &testOperation, headers); err != nil {
+	if err := client.CustomOperationWithHeaders(context.Background(), testQuery, testOperation.Variables(),
+		&testOperation, headers); err != nil {
 		t.Fatalf("error running custom operation with headers: %v", err)
 	}
 

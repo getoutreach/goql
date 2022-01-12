@@ -105,7 +105,8 @@ func (c *Client) Mutate(ctx context.Context, operation *Operation) error {
 // CustomOperationWithHeaders takes a query in the form of a string and attempts to marshal the response
 // into the resp parameter, which should be passed by reference (as a pointer). If nil is passed as the
 // actual parameter for the formal parameter resp, the response is discarded.
-func (c *Client) CustomOperationWithHeaders(ctx context.Context, query string, variables map[string]interface{}, resp interface{}, headers http.Header) error {
+func (c *Client) CustomOperationWithHeaders(ctx context.Context, query string, variables map[string]interface{},
+	resp interface{}, headers http.Header) error {
 	if headers == nil {
 		headers = http.Header{}
 	}

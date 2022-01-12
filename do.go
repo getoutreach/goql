@@ -75,7 +75,8 @@ type response struct {
 // will be marshaled into the resp parameter that should have been passed by reference.
 // If nil is passed as the actual parameter for the resp formal parameter, the response
 // is discarded.
-func (c *Client) doCustom(ctx context.Context, query string, variables map[string]interface{}, resp interface{}, headers http.Header) error {
+func (c *Client) doCustom(ctx context.Context, query string, variables map[string]interface{}, resp interface{},
+	headers http.Header) error {
 	var buf bytes.Buffer
 
 	// Create the request body using the constructed query or mutation.

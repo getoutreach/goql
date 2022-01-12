@@ -192,12 +192,12 @@ func (f *field) tokenizeWithFields(w io.Writer, fields interface{}) (bool, error
 	case bool:
 		write = ts
 		if len(f.Fields) > 0 {
-			return false, fmt.Errorf("field %s set to true in sparse fieldset map has children fields, needs submap for children fields", f.Decl.Name)
+			return false, fmt.Errorf("field %s set to true in sparse fieldset map has children fields, needs submap for children fields", f.Decl.Name) //nolint:lll // Why:long fixed string
 		}
 	case Fields:
 		write = true
 		if len(f.Fields) == 0 {
-			return false, fmt.Errorf("field %s set to a submap of fields in sparse fieldset map has no children fields, needs to be set to true or false", f.Decl.Name)
+			return false, fmt.Errorf("field %s set to a submap of fields in sparse fieldset map has no children fields, needs to be set to true or false", f.Decl.Name) //nolint:lll // Why:long fixed string
 		}
 	default:
 		// Include case when fields equals nil
