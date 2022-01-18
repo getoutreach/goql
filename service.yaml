@@ -1,29 +1,18 @@
 name: goql
 reportingTeam: fnd-dtss
+description: ""
 slack: ""
-grpc: false
-kafka: false
-http: false
 library: true
-scanAtBuild: false
-commands: []
-grpcClients: []
-adminPermissions: {}
-e2e:
-  requires: []
-  skips: []
 releaseType: semver
-releaseOptions:
-  allowPrereleases: false
-  allowMajorVersions: null
-deployToProd: ""
-resources: {}
-versions: {}
-authn:
-  audiences: []
-  canImpersonateUser: false
-  permittedUserScopes: ""
-  serviceActor:
-    audiences: []
-    actorTypes: []
-    governanceActors: []
+deployTo:
+  environments: []
+arguments:
+  dependencies:
+    optional: []
+    required: []
+  description: ""
+  reportingTeam: fnd-dtss
+  type: []
+modules:
+  - url: https://github.com/getoutreach/stencil-base
+    version: ""
