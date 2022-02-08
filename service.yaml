@@ -15,7 +15,8 @@ arguments:
     confluenceSpaceKey: ""
     designDocumentLink: ""
   reportingTeam: fnd-dtss
-  type: []
+  type:
+    - library
 modules:
   - url: https://github.com/getoutreach/stencil-base
     version: george-e-shaw-iv/feat/add-templates
