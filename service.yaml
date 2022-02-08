@@ -1,29 +1,30 @@
 name: goql
 reportingTeam: fnd-dtss
-slack: ""
-grpc: false
-kafka: false
-http: false
+description: A GraphQL client package written in Go.
+slack: dev-tooling-notifications
 library: true
-scanAtBuild: false
-commands: []
-grpcClients: []
-adminPermissions: {}
-e2e:
-  requires: []
-  skips: []
 releaseType: semver
-releaseOptions:
-  allowPrereleases: false
-  allowMajorVersions: null
-deployToProd: ""
-resources: {}
-versions: {}
-authn:
-  audiences: []
-  canImpersonateUser: false
-  permittedUserScopes: ""
-  serviceActor:
-    audiences: []
-    actorTypes: []
-    governanceActors: []
+deployTo:
+  environments: []
+arguments:
+  dependencies:
+    optional: []
+    required: []
+  description: A GraphQL client package written in Go.
+  opslevel:
+    confluenceSpaceKey: ""
+    designDocumentLink: ""
+  reportingTeam: fnd-dtss
+  type: []
+modules:
+  - url: https://github.com/getoutreach/stencil-base
+    version: george-e-shaw-iv/feat/add-templates
+opsLevel:
+  serviceTier: 0
+  lifecycle: ""
+  confluenceSpaceKey: ""
+  pagerDutyLink: ""
+  datadogDashboards:
+    mainLink: ""
+    custom: []
+  designDocumentLink: ""
