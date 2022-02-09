@@ -1,9 +1,17 @@
-# goql
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/getoutreach/goql.svg)](https://pkg.go.dev/github.com/getoutreach/goql)
-[![CircleCI](https://circleci.com/gh/getoutreach/goql.svg?style=shield&circle-token=b37cc0386e76b70d4bab8994c68e39c62f293d63)](https://circleci.com/gh/getoutreach/goql)
+# goql
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/getoutreach/goql)
 [![Generated via Bootstrap](https://img.shields.io/badge/Outreach-Bootstrap-%235951ff)](https://github.com/getoutreach/bootstrap)
 
+A GraphQL client package written in Go.
+
+## Contributing
+
+Please read the [CONTRIBUTING.md](CONTRIBUTING.md) document for guidelines on developing and contributing changes.
+
+## High-level Overview
+
+<!--- Block(overview) -->
 goql is a GraphQL client library with built-in two-way marshaling support via struct tags. This is key because it allows
 for strongly typed GraphQL queries as opposed to variables containing a string representation of the query. This also
 facilitates more advanced features, such as sparse field sets.
@@ -126,3 +134,5 @@ Rules:
     $page is defined to have both the type of `Int!` and `Int`.
     * `` MyModel struct `goql:"myModel(page:$page<Int!>),@include($page)"` `` would also result in an error, since
     $page is defined to have the type of both `Int!` and `Boolean!` (implicit when used in the include directive).
+
+<!--- EndBlock(overview) -->
