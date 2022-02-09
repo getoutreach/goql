@@ -3,6 +3,7 @@ reportingTeam: fnd-dtss
 description: A GraphQL client package written in Go.
 slack: dev-tooling-notifications
 library: true
+oss: true
 circleAPIKey: ""
 releaseType: semver
 deployTo:
@@ -16,7 +17,7 @@ arguments:
   opslevel:
     confluenceSpaceKey: ""
     designDocumentLink: ""
-  oss: false
+  oss: true
   reportingTeam: fnd-dtss
   type:
     - library
