@@ -3,10 +3,12 @@ reportingTeam: fnd-dtss
 description: A GraphQL client package written in Go.
 slack: dev-tooling-notifications
 library: true
+circleAPIKey: ""
 releaseType: semver
 deployTo:
   environments: []
 arguments:
+  circleAPIKey: ""
   dependencies:
     optional: []
     required: []
@@ -14,12 +16,13 @@ arguments:
   opslevel:
     confluenceSpaceKey: ""
     designDocumentLink: ""
+  oss: false
   reportingTeam: fnd-dtss
   type:
     - library
 modules:
   - url: https://github.com/getoutreach/stencil-base
-    version: george-e-shaw-iv/feat/add-templates
+    version: ""
 opsLevel:
   serviceTier: 0
   lifecycle: ""
