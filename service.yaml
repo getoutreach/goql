@@ -1,28 +1,33 @@
 name: goql
 reportingTeam: fnd-dtss
 description: A GraphQL client package written in Go.
+oss: true
 slack: dev-tooling-notifications
 library: true
-oss: true
 circleAPIKey: ""
 releaseType: semver
 deployTo:
   environments: []
 arguments:
   circleAPIKey: ""
+  commands: []
   dependencies:
     optional: []
     required: []
   description: A GraphQL client package written in Go.
+  grpcClients: []
   opslevel:
     confluenceSpaceKey: ""
     designDocumentLink: ""
   oss: true
+  releaseOptions:
+    allowMajorVersions: null
+    allowPrereleases: false
   reportingTeam: fnd-dtss
   type:
     - library
 modules:
-  - url: https://github.com/getoutreach/stencil-base
+  - name: github.com/getoutreach/stencil-base
     version: ""
 opsLevel:
   serviceTier: 0
