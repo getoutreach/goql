@@ -40,6 +40,37 @@ type Operation struct {
 	Response interface{}
 }
 
+// OperationError is a special type that brings together the properties that a
+// response error can include.
+type OperationError struct {
+	// Identifier helps identify the operation error in a request when coming through the Server.
+	// For example, if your operation looks like this:
+	//
+	//	error {
+	//		myOperation(foo: $foo) {
+	//			fieldOne
+	//			fieldTwo
+	//		}
+	//	}
+	//
+	// Then this field should be set to myOperation. It can also be more specific, a simple
+	// strings.Contains check occurs to match operations. A more specific example of a
+	// valid Identifier for the same operation given above would be myOperation(foo: $foo).
+	Identifier string
+
+	// Status represents the http status code that should be returned in the response
+	// whenever the server makes a match on OperationError.Identifier
+	Status int
+
+	// Error represents the error that should be returned in the response whenever
+	// the server makes a match on OperationError.Identifier
+	Error error
+
+	// Extensions represents the object that should be returned in the response
+	// as part of the api error whenever the server makes a match on OperationError.Extensions
+	Extensions interface{}
+}
+
 // --------------------------------------------------------- //
 // --- DEFAULT OPERATIONS ARE DEFINED BELOW THIS COMMENT --- //
 // --------------------------------------------------------- //
