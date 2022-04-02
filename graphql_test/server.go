@@ -75,7 +75,8 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 			return
 		}
 
-		if strings.HasPrefix(strings.TrimSpace(reqBody.Query), "mutation") {
+		switch {
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "mutation"):
 			for i := range s.mutations {
 				if strings.Contains(reqBody.Query, s.mutations[i].Identifier) {
 					if s.equalVariables(s.mutations[i].Variables, reqBody.Variables) {
@@ -84,7 +85,7 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 					}
 				}
 			}
-		} else if strings.HasPrefix(strings.TrimSpace(reqBody.Query), "query") {
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "query"):
 			for i := range s.queries {
 				if strings.Contains(reqBody.Query, s.queries[i].Identifier) {
 					if s.equalVariables(s.queries[i].Variables, reqBody.Variables) {
@@ -93,7 +94,7 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 					}
 				}
 			}
-		} else if strings.HasPrefix(strings.TrimSpace(reqBody.Query), "error") {
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "error"):
 			for i := range s.errors {
 				if strings.Contains(reqBody.Query, s.errors[i].Identifier) {
 					s.respondError(w, s.errors[i].Status, s.errors[i].Error, s.errors[i].Extensions)
