@@ -11,9 +11,9 @@ type Request struct {
 }
 
 type ResponseError struct {
-	Message    string   `json:"message"`
-	Path       []string `json:"path"`
-	Extensions struct{} `json:"extensions"`
+	Message    string      `json:"message"`
+	Path       []string    `json:"path"`
+	Extensions interface{} `json:"extensions"`
 }
 
 type Response struct {
@@ -21,18 +21,17 @@ type Response struct {
 	Errors []ResponseError `json:"errors,omitempty"`
 }
 
-func (s *Server) respondError(w http.ResponseWriter, status int, errs ...error) {
+func (s *Server) respondError(w http.ResponseWriter, status int, err error, extensions interface{}) {
 	s.t.Helper()
 
 	res := Response{
 		Data: nil,
 	}
 
-	for i := range errs {
-		res.Errors = append(res.Errors, ResponseError{
-			Message: errs[i].Error(),
-		})
-	}
+	res.Errors = append(res.Errors, ResponseError{
+		Message:    err.Error(),
+		Extensions: extensions,
+	})
 
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {

@@ -21,6 +21,7 @@ type Server struct {
 
 	mutations []Operation
 	queries   []Operation
+	errors    []OperationError
 
 	t      *testing.T
 	server *httptest.Server
@@ -70,11 +71,12 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var reqBody Request
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			s.respondError(w, http.StatusInternalServerError, errors.Wrap(err, "decode request body"))
+			s.respondError(w, http.StatusInternalServerError, errors.Wrap(err, "decode request body"), nil)
 			return
 		}
 
-		if strings.HasPrefix(strings.TrimSpace(reqBody.Query), "mutation") {
+		switch {
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "mutation"):
 			for i := range s.mutations {
 				if strings.Contains(reqBody.Query, s.mutations[i].Identifier) {
 					if s.equalVariables(s.mutations[i].Variables, reqBody.Variables) {
@@ -83,7 +85,7 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 					}
 				}
 			}
-		} else if strings.HasPrefix(strings.TrimSpace(reqBody.Query), "query") {
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "query"):
 			for i := range s.queries {
 				if strings.Contains(reqBody.Query, s.queries[i].Identifier) {
 					if s.equalVariables(s.queries[i].Variables, reqBody.Variables) {
@@ -92,9 +94,16 @@ func NewServer(t *testing.T, useDefaultOperations bool) *Server { //nolint:funle
 					}
 				}
 			}
+		case strings.HasPrefix(strings.TrimSpace(reqBody.Query), "error"):
+			for i := range s.errors {
+				if strings.Contains(reqBody.Query, s.errors[i].Identifier) {
+					s.respondError(w, s.errors[i].Status, s.errors[i].Error, s.errors[i].Extensions)
+					return
+				}
+			}
 		}
 
-		s.respondError(w, http.StatusNotFound, errors.New("operation not found"))
+		s.respondError(w, http.StatusNotFound, errors.New("operation not found"), nil)
 	})
 
 	s.server = httptest.NewServer(&mux)
@@ -131,6 +140,12 @@ func (s *Server) RegisterQuery(operation Operation) {
 func (s *Server) RegisterMutation(operation Operation) {
 	operation.opType = opMutation
 	s.mutations = append(s.mutations, operation)
+}
+
+// RegisterError registers an OperationError as an error that the server will recognize
+// and respond to.
+func (s *Server) RegisterError(operation OperationError) {
+	s.errors = append(s.errors, operation)
 }
 
 // Do takes a Request, performs it using the underlying httptest.Server, and returns a
