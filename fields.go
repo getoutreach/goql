@@ -119,7 +119,7 @@ func addRawFieldToFields(raw, delimiter string, fields Fields) {
 	count := strings.Count(raw, delimiter)
 	if count > 0 {
 		split := strings.Index(raw, delimiter)
-		current := raw[:split]
+		current := raw[:split] //nolint:gocritic // Why: Its what it needs to be.
 		leftover := raw[split+1:]
 
 		if _, ok := fields[current].(Fields); !ok {

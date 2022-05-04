@@ -73,7 +73,7 @@ func TestNewClient(t *testing.T) {
 				}
 
 				if e, a := test.SpecificErrorFromMapper.Error(), client.errorMapper(http.StatusBadRequest,
-					test.SpecificErrorFromMapper.(Errors)).Error(); e != a {
+					test.SpecificErrorFromMapper.(Errors)).Error(); e != a { //nolint:errorlint // Why: test code
 					t.Errorf("expected error returned from error mapper to be \"%s\", got \"%s\"", e, a)
 				}
 
