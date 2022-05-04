@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -196,7 +195,7 @@ func (c *Client) do(ctx context.Context, body io.Reader, headers http.Header) (j
 	// Attempt to decode the response from the GraphQL server.
 	if err := json.NewDecoder(decoderCopy).Decode(&gqlResp); err != nil {
 		// If the decode attempt failed, dump the body and return.
-		b, err := ioutil.ReadAll(&fallbackCopy)
+		b, err := io.ReadAll(&fallbackCopy)
 		if err != nil {
 			log.Error(ctx, "read non-200 status response body from graphql server",
 				events.Err(err), log.F{
