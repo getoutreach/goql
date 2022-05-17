@@ -1,19 +1,25 @@
-version: v1.14.1
-generated: 2022-05-04T19:28:32.95381Z
+version: v1.15.0
+generated: 2022-05-17T22:27:38.379198Z
 modules:
-- name: github.com/getoutreach/stencil-base
-  url: https://github.com/getoutreach/stencil-base
-  version: v0.3.0-rc.2
-- name: github.com/getoutreach/stencil-golang
-  url: https://github.com/getoutreach/stencil-golang
-  version: v0.3.0-rc.4
 - name: github.com/getoutreach/stencil-opslevel
   url: https://github.com/getoutreach/stencil-opslevel
-  version: v0.0.2-rc.5
+  version: v0.0.2
 - name: github.com/getoutreach/stencil-discovery
   url: https://github.com/getoutreach/stencil-discovery
   version: v1.0.0
+- name: github.com/getoutreach/stencil-base
+  url: https://github.com/getoutreach/stencil-base
+  version: v0.3.0
+- name: github.com/getoutreach/stencil-golang
+  url: https://github.com/getoutreach/stencil-golang
+  version: v0.3.2
 files:
+- name: _helpers
+  template: _helpers.tpl
+  module: github.com/getoutreach/stencil-opslevel
+- name: opslevel.yml
+  template: opslevel.yml.tpl
+  module: github.com/getoutreach/stencil-opslevel
 - name: .editorconfig
   template: .editorconfig.tpl
   module: github.com/getoutreach/stencil-base
@@ -272,9 +278,3 @@ files:
 - name: scripts/golangci.yml
   template: scripts/golangci.yml.tpl
   module: github.com/getoutreach/stencil-golang
-- name: _helpers
-  template: _helpers.tpl
-  module: github.com/getoutreach/stencil-opslevel
-- name: opslevel.yml
-  template: opslevel.yml.tpl
-  module: github.com/getoutreach/stencil-opslevel
