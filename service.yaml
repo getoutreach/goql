@@ -12,6 +12,7 @@ deployTo:
 arguments:
   circleAPIKey: ""
   commands: []
+  commitGuard: false
   dependencies:
     optional: []
     required: []
@@ -30,6 +31,7 @@ arguments:
     allowMajorVersions: null
     enablePrereleases: false
   reportingTeam: fnd-dtss
+  resources: {}
   service: false
   tutorial: false
   vaultSecrets:
@@ -38,6 +40,9 @@ arguments:
     - deploy/mint/%(environment)s/validation/mint-validator-payload
     - deploy/flagship-shared-secret/%(environment)s/authn-flagship-payload
 modules:
+  - name: github.com/getoutreach/stencil-outreach
+  - name: github.com/getoutreach/stencil-circleci
+  - name: github.com/getoutreach/stencil-actions
   - name: github.com/getoutreach/stencil-base
   - name: github.com/getoutreach/stencil-golang
   - name: github.com/getoutreach/stencil-opslevel
