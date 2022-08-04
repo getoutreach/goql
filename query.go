@@ -575,8 +575,11 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 
 	// Check to see if this type has already been built.
 	if cachedOperation, hit := cache.Load(rt); hit {
-		// Cache hit, use the tree that was already built.
-		operation = cachedOperation.(*field)
+		// Cache hit, copy by value the tree that was already built.
+		// A copy is needed because the top level declaration name (primitive type)
+		// of the operation is re-assigned.
+		opReplica := *cachedOperation.(*field)
+		operation = &opReplica
 	} else {
 		// Not in cache, need to build by walking through the type and then store it in the
 		// cache for later use.
