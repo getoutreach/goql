@@ -246,13 +246,27 @@ func (f *field) tokenizeWithFields(w io.Writer, fields interface{}) (bool, error
 	return write, nil
 }
 
+// tokenizeAsRoot skips tokenization for the declaration of the receiver field.
+// It writes the given declaration name to the writer interface and continues
+// the regular tokenization process for the field
+func (f *field) tokenizeAsRoot(w io.Writer, declName string, fields Fields) (bool, error) {
+	io.WriteString(w, declName) //nolint:errcheck
+	return f.tokenize(w, fields)
+}
+
+// tokenizeAsLeaf tokenizes the declaration of the receiver field and continues
+// the regular tokenization process for the field
+func (f *field) tokenizeAsLeaf(w io.Writer, fields Fields) (bool, error) {
+	f.Decl.tokenize(w)
+	return f.tokenize(w, fields)
+}
+
 // tokenize recurses through a field to write all of the information contained
 // within the root field as well as all of it's children field to any type that
 // implements the io.Writer interface.
 //
 // Returns a bool denoting whether or not the field was written and an error.
 func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:gocyclo
-	f.Decl.tokenize(w)
 	for _, directive := range f.Directives {
 		io.WriteString(w, " ") //nolint:errcheck
 		directive.tokenize(w)
@@ -266,7 +280,7 @@ func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:go
 
 		for _, field := range f.Fields {
 			if fields == nil {
-				written, err = field.tokenize(w, nil)
+				written, err = field.tokenizeAsLeaf(w, nil)
 			} else {
 				written, err = field.tokenizeWithFields(w, fields)
 			}
@@ -633,18 +647,18 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 
 	// The top-level declaration will be the name of the struct (q), we don't need that. We
 	// need either "query" or "mutation" at the root-level of the operation.
-	operation.Decl.Name = wrapper
+	declName := wrapper
 
 	// If there are arguments, add them to the root-level "query" or "mutation" operation identifier
 	// within parenthesis.
 	if len(args) > 0 {
-		operation.Decl.Name = fmt.Sprintf("%s(%s)", operation.Decl.Name, strings.Join(args, ", "))
+		declName = fmt.Sprintf("%s(%s)", declName, strings.Join(args, ", "))
 	}
 
 	var b strings.Builder
 
 	// Construct the actual operation from the fields gathered while walking through q's nodes.
-	if _, err := operation.tokenize(&b, fields); err != nil {
+	if _, err := operation.tokenizeAsRoot(&b, declName, fields); err != nil {
 		return "", err
 	}
 

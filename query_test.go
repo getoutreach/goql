@@ -128,6 +128,22 @@ fieldTwo
 }`,
 		},
 		{
+			Name: "WithArrayVariables",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string
+					FieldTwo string
+				} `goql:"testQuery(id:$id<ID!>,list:$list<[List!]>)"`
+			}{},
+			Fields: nil,
+			ExpectedOutput: `query($id: ID!, $list: [List!]) {
+testQuery(id: $id, list: $list) {
+fieldOne
+fieldTwo
+}
+}`,
+		},
+		{
 			Name: "WithNameOverride",
 			Input: struct {
 				TestQuery struct {
