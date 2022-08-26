@@ -9,7 +9,7 @@ version: 1
 service:
   name: goql
   product: Outreach
-  owner: fnd_dt
+  owner: cs_outreach-extensibility
   language: Golang
   framework: stencil
   description: >
@@ -28,7 +28,7 @@ service:
     - key: repo
       value: "https://github.com/getoutreach/goql"
     - key: reporting_team
-      value: "fnd-dt"
+      value: "cs-outreach-extensibility"
     - key: app
       value: "goql"
     - key: name

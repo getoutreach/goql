@@ -1,5 +1,5 @@
 version: v1.21.1
-generated: 2022-08-21T21:51:29.871042Z
+generated: 2022-08-26T18:52:43.64427Z
 modules:
     - name: github.com/getoutreach/stencil-actions
       url: https://github.com/getoutreach/stencil-actions

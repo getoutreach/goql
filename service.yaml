@@ -1,8 +1,8 @@
 name: goql
-reportingTeam: fnd-dt
+reportingTeam: cs-outreach-extensibility
 description: A GraphQL client package written in Go.
 oss: true
-slack: dev-tooling-notifications
+slack: orexservice-notifications
 library: true
 circleAPIKey: ""
 lintroller: bronze
@@ -33,7 +33,7 @@ arguments:
   releaseOptions:
     allowMajorVersions: null
     enablePrereleases: false
-  reportingTeam: fnd-dt
+  reportingTeam: cs-outreach-extensibility
   resources: {}
   service: false
   tracing: honeycomb
@@ -44,12 +44,12 @@ arguments:
     - deploy/mint/%(environment)s/validation/mint-validator-payload
     - deploy/flagship-shared-secret/%(environment)s/authn-flagship-payload
 modules:
-  - name: github.com/getoutreach/stencil-opslevel
   - name: github.com/getoutreach/stencil-outreach
   - name: github.com/getoutreach/stencil-circleci
   - name: github.com/getoutreach/stencil-actions
   - name: github.com/getoutreach/stencil-base
   - name: github.com/getoutreach/stencil-golang
+  - name: github.com/getoutreach/stencil-opslevel
 opsLevel:
   serviceTier: 0
   lifecycle: ""
