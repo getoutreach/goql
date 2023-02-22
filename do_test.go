@@ -244,11 +244,11 @@ func TestDoHeadersOverride(t *testing.T) {
 	headers.Set("Accept", "invalid header")
 	client.do(context.Background(), &buf, headers)
 	if headers.Get("Accept") != "*/*" {
-		t.Fatal("Unexpected header Accept")
+		t.Fatal("Unexpected header Accept value")
 	}
 	headers.Set("Accept", "application/json")
 	client.do(context.Background(), &buf, headers)
 	if headers.Get("Accept") != "application/json" {
-		t.Fatal("Unexpected header Accept")
+		t.Fatal("Unexpected header Accept value")
 	}
 }
