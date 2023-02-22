@@ -172,6 +172,16 @@ func (c *Client) do(ctx context.Context, body io.Reader, headers http.Header) (j
 	// decoding the response body for us, if it is encoded.
 	req.Header.Del("Accept-Encoding")
 
+	// Ensure headers compliance with GQL service expectations
+	if accept := headers.Get("Accept"); accept != "" {
+		if !strings.Contains(accept, "application/graphql-response+json") &&
+			!strings.Contains(accept, "application/json") &&
+			!strings.Contains(accept, "multipart/mixed;boundary=\"graphql\";deferSpec=20220824") &&
+			!strings.Contains(accept, "*/*") {
+			headers.Set("Accept", "*/*")
+		}
+	}
+
 	// Do the GraphQL request using the HTTP client that was configured for this GraphQL client.
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

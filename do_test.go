@@ -1,7 +1,9 @@
 package goql
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -219,5 +221,34 @@ func TestDoStruct(t *testing.T) {
 			}
 		}
 		t.Run(test.Name, fn)
+	}
+}
+
+func TestDoHeadersOverride(t *testing.T) {
+	ts := graphql_test.NewServer(t, true)
+	t.Cleanup(ts.Close)
+	var buf bytes.Buffer
+	query := "query"
+	if err := json.NewEncoder(&buf).Encode(request{ //nolint:gocritic
+		Query:     query,
+		Variables: nil,
+	}); err != nil {
+		t.Fatalf("error building buffer: %v", err)
+	}
+	headers := http.Header{}
+	client := NewClient(ts.URL, DefaultClientOptions)
+	client.do(context.Background(), &buf, headers)
+	if headers.Get("Accept") != "" {
+		t.Fatal("Unexpected header Accept")
+	}
+	headers.Set("Accept", "invalid header")
+	client.do(context.Background(), &buf, headers)
+	if headers.Get("Accept") != "*/*" {
+		t.Fatal("Unexpected header Accept")
+	}
+	headers.Set("Accept", "application/json")
+	client.do(context.Background(), &buf, headers)
+	if headers.Get("Accept") != "application/json" {
+		t.Fatal("Unexpected header Accept")
 	}
 }
