@@ -23,6 +23,8 @@ const (
 	opMutation
 )
 
+const applicationJSON = "application/json"
+
 // Operation is an encapsulation of all of the elements that are used to compose an operation
 // using struct tags. The OperationType field should always be passed by reference in order for
 // the data to be able to be marshaled back into it.
@@ -166,14 +168,14 @@ func (c *Client) do(ctx context.Context, body io.Reader, headers http.Header) (j
 	req.Header = headers
 
 	// The Content-Type of this request will always be application/json as per the GraphQL specification.
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", applicationJSON)
 
 	// We don't want this header to be set because then we won't get the luxury of the transport automatically
 	// decoding the response body for us, if it is encoded.
 	req.Header.Del("Accept-Encoding")
 
 	// Ensure headers compliance with GQL service expectations
-	headers.Set("Accept", "application/json")
+	headers.Set("Accept", applicationJSON)
 
 	// Do the GraphQL request using the HTTP client that was configured for this GraphQL client.
 	resp, err := c.httpClient.Do(req)
