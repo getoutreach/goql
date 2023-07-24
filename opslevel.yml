@@ -28,7 +28,7 @@ service:
     - key: repo
       value: "https://github.com/getoutreach/goql"
     - key: reporting_team
-      value: "cs-outreach-extensibility"
+      value: "end-ades"
     - key: app
       value: "goql"
     - key: name
