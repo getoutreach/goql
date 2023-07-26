@@ -9,7 +9,7 @@ version: 1
 service:
   name: goql
   product: Outreach
-  owner: cs_outreach-extensibility
+  owner: end-ades
   language: Golang
   framework: stencil
   description: >
