@@ -1,5 +1,5 @@
 name: goql
-reportingTeam: cs-outreach-extensibility
+reportingTeam: end-ades
 description: A GraphQL client package written in Go.
 oss: true
 slack: orexservice-notifications
@@ -33,7 +33,7 @@ arguments:
   releaseOptions:
     allowMajorVersions: null
     enablePrereleases: false
-  reportingTeam: cs-outreach-extensibility
+  reportingTeam: end-ades
   resources: {}
   service: false
   tracing: honeycomb
