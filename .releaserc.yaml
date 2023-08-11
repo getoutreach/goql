@@ -21,6 +21,6 @@ plugins:
   - "@semantic-release/release-notes-generator"
   - "@semantic-release/github"
 
-  ### Block(customReleasePlugins)
+  ## <<Stencil::Block(customReleasePlugins)>>
 
-  ### EndBlock(customReleasePlugins)
+  ## <</Stencil::Block>>

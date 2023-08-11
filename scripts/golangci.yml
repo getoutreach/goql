@@ -2,20 +2,6 @@
 lintroller:
   tier: "bronze"
 
-severity:
-  default-severity: error
-  case-sensitive: false
-  rules:
-    - severity: warning
-      # New rule, add as warning for now
-      text: "^(redundantSprint|ioutilDeprecated|octalLiteral):"
-      linters:
-        - gocritic
-    - severity: warning
-      # New rule, add as warning for now
-      linters:
-        - errorlint
-
 # Linter settings
 linters-settings:
   errcheck:
@@ -33,8 +19,6 @@ linters-settings:
   goconst:
     min-len: 3
     min-occurrences: 3
-  depguard:
-    list-type: blacklist
   misspell:
     locale: US
   lll:
@@ -48,6 +32,10 @@ linters-settings:
       - style
     disabled-checks:
       - whyNoLint # Doesn't seem to work properly
+      # Suggests bad simplifications (After is not identical to !Before).
+      # TODO(jkinkead): Remove when we have a version of go-critic with
+      # https://github.com/go-critic/go-critic/pull/1281 merged.
+      - timeCmpSimplify
   funlen:
     lines: 500
     statements: 50
@@ -57,8 +45,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
-    - depguard
     - dogsled
     - errcheck
     - errorlint
@@ -80,12 +66,10 @@ linters:
     # - misspell        # The reason we're disabling this right now is because it uses 1/2 of the memory of the run.
     - nakedret
     - staticcheck
-    - structcheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
 
 issues:
@@ -104,6 +88,7 @@ issues:
         - gosec
         - funlen
         - gochecknoglobals # Globals in test files are tolerated.
+        - goconst # Repeated consts in test files are tolerated.
     # This rule is buggy and breaks on our `///Block` lines.  Disable for now.
     - linters:
         - gocritic
@@ -113,6 +98,9 @@ issues:
       text: "SA5011"
       linters:
         - staticcheck
+    - linters:
+        - lll
+      source: "^//go:generate "
 
 output:
   format: colored-line-number
