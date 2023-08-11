@@ -14,6 +14,8 @@ deployTo:
 arguments:
   circleAPIKey: ""
   commands: []
+  ciOptions:
+    skipDocker: true
   commitGuard: false
   dependencies:
     optional: []
