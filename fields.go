@@ -88,9 +88,10 @@ func FieldsFromURLQueryParam(raw string) Fields {
 // subFieldDelimiter: .
 // ---
 // Output:
+//
 //	graphql.Fields{
-// 		"id": true,
-// 		"name": true,
+//		"id": true,
+//		"name": true,
 //		"parent": graphql.Fields{
 //			"id": true,
 //			"parentOfParent": graphql.Fields{

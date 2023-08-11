@@ -133,11 +133,11 @@ fieldTwo
 				TestQuery struct {
 					FieldOne string
 					FieldTwo string
-				} `goql:"testQuery(id:$id<ID!>,list:$list<[List!]>)"`
+				} `goql:"testQuery(id:$id<ID!>,list:$list<[List!]>,list2:$list2<[List2!]!>)"`
 			}{},
 			Fields: nil,
-			ExpectedOutput: `query($id: ID!, $list: [List!]) {
-testQuery(id: $id, list: $list) {
+			ExpectedOutput: `query($id: ID!, $list: [List!], $list2: [List2!]!) {
+testQuery(id: $id, list: $list, list2: $list2) {
 fieldOne
 fieldTwo
 }
