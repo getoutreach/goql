@@ -21,14 +21,14 @@ var (
 	reName = regexp.MustCompile(`^\w+$`)
 
 	// reDecl matches a model name with arguments and their types.
-	// e.g. getUser(name:$name<String!>,age:$age<Int>)
-	reDecl     = regexp.MustCompile(`^(?P<name>\w+)(?P<args>\((?:\w+:\$\w+<\[?\w+!?]?>,?)*\))$`)
+	// e.g. getUser(name:$name<String!>,age:$age<Int>,alias:$alias<[String!]!>)
+	reDecl     = regexp.MustCompile(`^(?P<name>\w+)(?P<args>\((?:\w+:\$\w+<\[?\w+!?]?!?>,?)*\))$`)
 	reDeclName = reDecl.SubexpIndex("name")
 	reDeclArgs = reDecl.SubexpIndex("args")
 
 	// reParam extracts parameters from a model name with arguments and their types (reDecl).
 	// e.g. getUser(name:$name<String!>,age:$age<Int>) -> [name:$name<String!>, age:$age<Int>]
-	reParam     = regexp.MustCompile(`(?P<name>\w+):\$(?P<arg>\w+)<(?P<kind>\[?\w+!?]?)>`)
+	reParam     = regexp.MustCompile(`(?P<name>\w+):\$(?P<arg>\w+)<(?P<kind>\[?\w+!?]?!?)>`)
 	reParamName = reParam.SubexpIndex("name")
 	reParamArg  = reParam.SubexpIndex("arg")
 	reParamKind = reParam.SubexpIndex("kind")

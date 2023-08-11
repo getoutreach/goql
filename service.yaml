@@ -14,6 +14,8 @@ deployTo:
 arguments:
   circleAPIKey: ""
   commands: []
+  ciOptions:
+    skipDocker: true
   commitGuard: false
   dependencies:
     optional: []
@@ -31,12 +33,12 @@ arguments:
     designDocumentLink: ""
   oss: true
   releaseOptions:
-    allowMajorVersions: null
+    allowMajorVersions: false
     enablePrereleases: false
   reportingTeam: end-ades
   resources: {}
   service: false
-  tracing: honeycomb
+  tracing: opentelemetry
   tutorial: false
   vaultSecrets:
     - deploy/honeycomb_new/%(environment)s/honeycomb
@@ -49,7 +51,6 @@ modules:
   - name: github.com/getoutreach/stencil-actions
   - name: github.com/getoutreach/stencil-base
   - name: github.com/getoutreach/stencil-golang
-  - name: github.com/getoutreach/stencil-opslevel
 opsLevel:
   serviceTier: 0
   lifecycle: ""

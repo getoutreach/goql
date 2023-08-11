@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/about-codeowners/
 * @getoutreach/end-ades
 
-###Block(customCodeowners)
+## <<Stencil::Block(customCodeowners)>>
 
-###EndBlock(customCodeowners)
+## <</Stencil::Block>>

@@ -1,8 +1,10 @@
 # goql
-
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/getoutreach/goql)
 [![Generated via Bootstrap](https://img.shields.io/badge/Outreach-Bootstrap-%235951ff)](https://github.com/getoutreach/bootstrap)
 [![Coverage Status](https://coveralls.io/repos/github/getoutreach/goql/badge.svg?branch=main)](https://coveralls.io/github//getoutreach/goql?branch=main)
+<!-- <<Stencil::Block(extraBadges)>> -->
+
+<!-- <</Stencil::Block>> -->
 
 A GraphQL client package written in Go.
 
@@ -12,7 +14,7 @@ Please read the [CONTRIBUTING.md](CONTRIBUTING.md) document for guidelines on de
 
 ## High-level Overview
 
-<!--- Block(overview) -->
+<!-- <<Stencil::Block(overview)>> -->
 
 goql is a GraphQL client library with built-in two-way marshaling support via struct tags. This is key because it allows
 for strongly typed GraphQL queries as opposed to variables containing a string representation of the query. This also
@@ -146,4 +148,4 @@ Rules:
   - `` MyModel struct `goql:"myModel(page:$page<Int!>),@include($page)"` `` would also result in an error, since
     $page is defined to have the type of both `Int!` and `Boolean!` (implicit when used in the include directive).
 
-<!--- EndBlock(overview) -->
+<!-- <</Stencil::Block>> -->
