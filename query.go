@@ -153,6 +153,11 @@ func argsFromTokens(tokens []token) ([]string, error) {
 	// len(tokens) might be too big, but it's at least the max size it could be.
 	argsMap := make(map[string]string, len(tokens))
 
+	// we want to ensure these args are always in the same ouput order as they were in the input
+	// order (first appearance wins). By having a sorted order of the keys, we achieve stable
+	// marshal output
+	argOrder := []string{}
+
 	// Make sure we don't duplicate variables if they're used more than once, and if
 	// they are used more than once, validate their types are the same.
 	for _, token := range tokens {
@@ -164,13 +169,15 @@ func argsFromTokens(tokens []token) ([]string, error) {
 		}
 
 		argsMap[token.Arg] = token.Kind
+		argOrder = append(argOrder, token.Arg)
 	}
 
 	// This slice will contain values in the form of $<arg>: <Type> which can be joined
 	// with strings.Join(args, ", ") by the caller to achieve the correct format.
 	args := make([]string, 0, len(argsMap))
 
-	for arg, kind := range argsMap {
+	for _, arg := range argOrder {
+		kind := argsMap[arg]
 		args = append(args, fmt.Sprintf("$%s: %s", arg, kind))
 	}
 
