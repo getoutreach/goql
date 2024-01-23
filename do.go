@@ -116,11 +116,19 @@ func (c *Client) doStruct(ctx context.Context, operationType int, operation *Ope
 	// or mutation.
 	switch operationType {
 	case opQuery:
-		if queryStr, err = MarshalQuery(operation.OperationType, operation.Fields); err != nil {
+		if queryStr, err = MarshalQueryWithOptions(
+			operation.OperationType,
+			operation.Fields,
+			c.marshalOpts...,
+		); err != nil {
 			return err
 		}
 	case opMutation:
-		if queryStr, err = MarshalMutation(operation.OperationType, operation.Fields); err != nil {
+		if queryStr, err = MarshalMutationWithOptions(
+			operation.OperationType,
+			operation.Fields,
+			c.marshalOpts...,
+		); err != nil {
 			return err
 		}
 	}

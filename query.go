@@ -1,6 +1,7 @@
 package goql
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -335,13 +336,23 @@ func splitTag(tag string) []string {
 	return split
 }
 
+var errSkipFieldFromTag = errors.New("tag on this struct field indicates this field should be skipped")
+
+type tagParser func(reflect.StructTag) (field, error)
+
 // parseTag takes the value of a graphql tag and parses it into various declarations
 // and directives.
-func parseTag(tag string) (field, error) { //nolint:funlen
+func parseTag(tag reflect.StructTag) (field, error) { //nolint:funlen
 	var f field
 	var alias string
 
-	for _, item := range splitTag(tag) {
+	goqlTag := tag.Get(structTag)
+
+	if goqlTag == "-" {
+		return field{}, errSkipFieldFromTag
+	}
+
+	for _, item := range splitTag(goqlTag) {
 		item = strings.TrimSpace(item)
 
 		switch {
@@ -369,7 +380,7 @@ func parseTag(tag string) (field, error) { //nolint:funlen
 		case item == keepTag:
 			f.Keep = true
 		default:
-			return field{}, fmt.Errorf("failed to parse tag \"%s\"", tag)
+			return field{}, fmt.Errorf("failed to parse tag %q", goqlTag)
 		}
 	}
 
@@ -385,11 +396,28 @@ func parseTag(tag string) (field, error) { //nolint:funlen
 	for i := 1; i < len(f.Directives); i++ {
 		x, y := &f.Directives[i], f.Directives[j]
 		if x.Type == y.Type {
-			return field{}, fmt.Errorf("duplicate directive in tag \"%s\"", x.Type)
+			return field{}, fmt.Errorf("duplicate directive in tag %q", x.Type)
 		}
 		j++
 	}
 
+	return f, nil
+}
+
+func parseTagSupportingJSON(tag reflect.StructTag) (field, error) {
+	f, err := parseTag(tag)
+	if err != nil {
+		return field{}, err
+	}
+	if tag.Get(structTag) != "" {
+		return f, nil
+	}
+
+	// this way of getting the name of a field according to the JSON tag comes straight from the
+	// internals of the Go JSON module impl:
+	//     https://cs.opensource.google/go/go/+/b3acaa8230e95c232a6f5c30eb7619a0c859ab16:src/encoding/json/tags.go;l=18
+	jsonname, _, _ := strings.Cut(tag.Get("json"), ",")
+	f.Decl.Name = jsonname
 	return f, nil
 }
 
@@ -457,7 +485,7 @@ func parseDirective(s string) (directive, error) {
 type node struct {
 	Name string
 	Type reflect.Type
-	Tag  string
+	Tag  reflect.StructTag
 }
 
 // visit defines a function signature used when "visiting" each node in a tree
@@ -490,15 +518,10 @@ func listFields(st reflect.Type) []node {
 			continue
 		}
 
-		tag := field.Tag.Get(structTag)
-		if tag == "-" {
-			continue
-		}
-
 		fields = append(fields, node{
 			Name: field.Name,
 			Type: deref(field.Type),
-			Tag:  tag,
+			Tag:  field.Tag,
 		})
 	}
 	return fields
@@ -568,18 +591,79 @@ func deref(t reflect.Type) reflect.Type {
 	return t
 }
 
+// optstruct holds onto state useful when applying options
+type optStruct struct {
+	tp tagParser
+}
+
+// marshalOption is the type for our functional option for the marshal functions of GoQL. It's
+// intentionally not publicly exported, as we only want to support our first-party options.
+type marshalOption func(*optStruct)
+
+// OptGoqlTagsOnly will cause the marshalling procedure of goql to *only* look at the `goql` struct
+// tags when marshalling a struct into a GQL operation. The behavior caused by this option is the
+// default behavior of goql, this option is provided for explicitness sake. If you would like
+// marshalling to use `goql` struct tags and then to _fall back_ on JSON struct tags if no goql tags
+// are present on a struct, then use the OptFallbackJSONTag option.
+func OptGoqlTagsOnly(opt *optStruct) {
+	opt.tp = parseTag
+}
+
+// OptFallbackJSONTag causes the marshalling of structs to queries to still respect goql struct tags
+// in the same way as default, but if no `goql` struct tag is present, marshalling will try to
+// derive the name-in-GQL of that struct field from a `json` struct tag, if a `json` struct tag is
+// present. If no `goql` struct tag AND no `json` struct tag are present, then marshalling defaults
+// to the same toLowerCamelCase approach as always.
+func OptFallbackJSONTag(opt *optStruct) {
+	opt.tp = parseTagSupportingJSON
+}
+
 // MarshalQuery takes a variable that must be a struct type and constructs a GraphQL
 // operation using it's fields and graphql struct tags that can be used as a GraphQL
 // query operation.
 func MarshalQuery(q interface{}, fields Fields) (string, error) {
-	return marshal(q, "query", fields)
+	return MarshalQueryWithOptions(q, fields, OptGoqlTagsOnly)
 }
 
 // MarshalMutation takes a variable that must be a struct type and constructs a GraphQL
 // operation using it's fields and graphql struct tags that can be used as a GraphQL
 // mutation operation.
 func MarshalMutation(q interface{}, fields Fields) (string, error) {
-	return marshal(q, "mutation", fields)
+	return MarshalMutationWithOptions(q, fields, OptGoqlTagsOnly)
+}
+
+// MarshalQueryWithOptions takes a variable that must be a struct type and constructs a GraphQL
+// operation using it's fields and graphql struct tags that can be used as a GraphQL query
+// operation. Additionally, MarshalQueryWithOptions accepts an array of functional options to
+// change the marshalling behavior.
+func MarshalQueryWithOptions(q interface{}, fields Fields, opts ...marshalOption) (string, error) {
+	o := optStruct{}
+	// by putting OptGoqlTagsOnly at the front, we ensure it'll be overridden by subsequent
+	// user-provided options
+	opts = append([]marshalOption{OptGoqlTagsOnly}, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt(&o)
+		}
+	}
+	return marshal(q, "query", fields, o.tp)
+}
+
+// MarshalMutationWithOptions takes a variable that must be a struct type and constructs a GraphQL
+// operation using it's fields and graphql struct tags that can be used as a GraphQL mutation
+// operation. Additionally, MarshalMutationWithOptions accepts an array of functional options to
+// change the marshalling behavior.
+func MarshalMutationWithOptions(q interface{}, fields Fields, opts ...marshalOption) (string, error) {
+	o := optStruct{}
+	// by putting OptGoqlTagsOnly at the front, we ensure it'll be overridden by subsequent
+	// user-provided options
+	opts = append([]marshalOption{OptGoqlTagsOnly}, opts...)
+	for _, opt := range opts {
+		if opt != nil {
+			opt(&o)
+		}
+	}
+	return marshal(q, "mutation", fields, o.tp)
 }
 
 // cache stores the resulting tree of types who have already been through the marshaling
@@ -590,7 +674,7 @@ var cache sync.Map
 // using it's fields and graphql struct tags. The wrapper variable defines what type of
 // GraphQL operation will be returned ("query" or "mutation", although this is not
 // explicitly checked since this function is only called from within this package).
-func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //nolint:funlen
+func marshal(q interface{}, wrapper string, fields Fields, tagParse tagParser) (string, error) { //nolint:funlen
 	var operation *field
 	rt := reflect.TypeOf(q)
 
@@ -608,8 +692,10 @@ func marshal(q interface{}, wrapper string, fields Fields) (string, error) { //n
 		// and their tokens which are used to create the GraphQL operation.
 		visitFn := func(n *node) error {
 			if n != nil {
-				f, err := parseTag(n.Tag)
-				if err != nil {
+				f, err := tagParse(n.Tag)
+				if err != nil && errors.Is(err, errSkipFieldFromTag) {
+					return nil
+				} else if err != nil {
 					return err
 				}
 

@@ -18,6 +18,7 @@ type Client struct {
 	url         string
 	httpClient  *http.Client
 	errorMapper ErrorMapper
+	marshalOpts []marshalOption
 }
 
 // ClientOptions is the type passed to NewClient that allows for configuration of the client.
@@ -31,16 +32,23 @@ type Client struct {
 // to give more context to the callee. If omitted or nil the Errors type will be returned
 // in the case of any errors that came from the GraphQL server. See the documentation for
 // the Errors type for more information as to what can be done with this mapping function.
+//
+// UseJSONTagNameAsFallback indicates whether goql should fall back on using the `json`
+// struct tags if there's no `goql` struct tags when marshaling a struct into a query. If
+// true, only the name of the field is inferred from the JSON struct tag, not any other
+// attribute such as alias, include, or keep. Default value is false.
 type ClientOptions struct {
-	HTTPClient  *http.Client
-	ErrorMapper ErrorMapper
+	HTTPClient               *http.Client
+	ErrorMapper              ErrorMapper
+	UseJSONTagNameAsFallback bool
 }
 
 // DefaultClientOptions is a variable that can be passed for the ClientOptions when calling
 // NewClient that will trigger use of all of the default options.
 var DefaultClientOptions = ClientOptions{
-	HTTPClient:  nil,
-	ErrorMapper: nil,
+	HTTPClient:               nil,
+	ErrorMapper:              nil,
+	UseJSONTagNameAsFallback: false,
 }
 
 // defaultErrorMapper shallow returns the Errors type that came from the response of a GraphQL
@@ -63,10 +71,16 @@ func NewClient(clientURL string, options ClientOptions) *Client {
 		options.ErrorMapper = defaultErrorMapper
 	}
 
+	marshOpts := []marshalOption{}
+	if options.UseJSONTagNameAsFallback {
+		marshOpts = append(marshOpts, OptFallbackJSONTag)
+	}
+
 	return &Client{
 		url:         clientURL,
 		httpClient:  options.HTTPClient,
 		errorMapper: options.ErrorMapper,
+		marshalOpts: marshOpts,
 	}
 }
 

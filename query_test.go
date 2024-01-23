@@ -13,6 +13,7 @@ func TestMarshalQuery(t *testing.T) {
 		Name           string
 		Input          interface{}
 		Fields         Fields
+		Option         marshalOption
 		ExpectedOutput string // IfExpectedOutput == "", it implies an error.
 	}{
 		{
@@ -292,6 +293,36 @@ fieldABC
 }
 }`,
 		},
+		{
+			Name: "SimpleWithJSON",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+differentField
+}
+}`,
+		},
+		{
+			Name: "JSONOverriddenByGoqlTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField" goql:"overrideName"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+overrideName
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -300,7 +331,7 @@ fieldABC
 		fn := func(t *testing.T) {
 			t.Parallel()
 
-			actualOutput, err := MarshalQuery(test.Input, test.Fields)
+			actualOutput, err := MarshalQueryWithOptions(test.Input, test.Fields, test.Option)
 			if err != nil {
 				if test.ExpectedOutput == "" {
 					// The error was expected, return without reporting anything.
@@ -338,6 +369,7 @@ func TestMarshalMutation(t *testing.T) {
 		Name           string
 		Input          interface{}
 		Fields         Fields
+		Option         marshalOption
 		ExpectedOutput string // IfExpectedOutput == "", it implies an error.
 	}{
 		{
@@ -601,6 +633,36 @@ fieldABC
 }
 }`,
 		},
+		{
+			Name: "SimpleWithJSON",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `mutation {
+testQuery {
+differentField
+}
+}`,
+		},
+		{
+			Name: "JSONOverriddenByGoqlTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField" goql:"overrideName"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `mutation {
+testQuery {
+overrideName
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -609,7 +671,7 @@ fieldABC
 		fn := func(t *testing.T) {
 			t.Parallel()
 
-			actualOutput, err := MarshalMutation(test.Input, test.Fields)
+			actualOutput, err := MarshalMutationWithOptions(test.Input, test.Fields, test.Option)
 			if err != nil {
 				if test.ExpectedOutput == "" {
 					// The error was expected, return without reporting anything.
