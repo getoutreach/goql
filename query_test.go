@@ -3,89 +3,9 @@ package goql
 import (
 	"strings"
 	"testing"
-	"unicode/utf8"
+
+	"github.com/pmezard/go-difflib/difflib"
 )
-
-// computeLevenshteinDistance computes the levenshtein distance between the two
-// strings passed as an argument. The return value is the levenshtein distance.
-func computeLevenshteinDistance(a, b string) int {
-	// Custom local min function, since math.Min takes float64
-	min := func(a, b uint16) uint16 {
-		if a < b {
-			return a
-		}
-		return b
-	}
-
-	// If a is empty, the distance is the length of b.
-	if a == "" {
-		return utf8.RuneCountInString(b)
-	}
-
-	// If b is empty, the distance is the length of a.
-	if b == "" {
-		return utf8.RuneCountInString(a)
-	}
-
-	// If the two strings are equal there is no need to computer the distance, it will
-	// be 0.
-	if a == b {
-		return 0
-	}
-
-	s1 := []rune(a)
-	s2 := []rune(b)
-
-	// Swap to save on memory complexity: O(min(a,b)) instead of O(a)
-	if len(s1) > len(s2) {
-		s1, s2 = s2, s1
-	}
-	lenS1 := len(s1)
-	lenS2 := len(s2)
-
-	// init the row
-	x := make([]uint16, lenS1+1)
-
-	// Start from 1 because index 0 is already 0.
-	for i := 1; i < len(x); i++ {
-		x[i] = uint16(i)
-	}
-
-	// Make a dummy bounds check to prevent the 2 bounds check down below.
-	// The one inside the loop is particularly costly.
-	_ = x[lenS1]
-
-	// Fill in the rest
-	for i := 1; i <= lenS2; i++ {
-		prev := uint16(i)
-		for j := 1; j <= lenS1; j++ {
-			current := x[j-1] // match
-			if s2[i-1] != s1[j-1] {
-				current = min(min(x[j-1]+1, prev+1), x[j]+1)
-			}
-			x[j-1] = prev
-			prev = current
-		}
-		x[lenS1] = prev
-	}
-
-	return int(x[lenS1])
-}
-
-// percentageMatch uses the Levenshtein distance to compute a percentage match
-// between two strings.
-func percentageMatch(expected, actual string) float64 {
-	dist := computeLevenshteinDistance(expected, actual)
-	return 1 - float64(dist/len(expected))
-}
-
-// minPercentageMatch is the minimum percentage that two output operations from
-// being marshaled can match without resulting in a test error. The reason this
-// is used is because we can't always count on the variables being set in the
-// same order on the output string operations. If the variables are ordered
-// differently, the operations are fundamentally the same, but comparison of the
-// two strings will render a false result.
-const minPercentageMatch = 0.95
 
 // TestMarshalQuery tests the MarshalQuery function.
 func TestMarshalQuery(t *testing.T) {
@@ -93,6 +13,7 @@ func TestMarshalQuery(t *testing.T) {
 		Name           string
 		Input          interface{}
 		Fields         Fields
+		Option         marshalOption
 		ExpectedOutput string // IfExpectedOutput == "", it implies an error.
 	}{
 		{
@@ -372,6 +293,36 @@ fieldABC
 }
 }`,
 		},
+		{
+			Name: "SimpleWithJSON",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+differentField
+}
+}`,
+		},
+		{
+			Name: "JSONOverriddenByGoqlTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField" goql:"overrideName"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+overrideName
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -380,7 +331,7 @@ fieldABC
 		fn := func(t *testing.T) {
 			t.Parallel()
 
-			actualOutput, err := MarshalQuery(test.Input, test.Fields)
+			actualOutput, err := MarshalQueryWithOptions(test.Input, test.Fields, test.Option)
 			if err != nil {
 				if test.ExpectedOutput == "" {
 					// The error was expected, return without reporting anything.
@@ -396,9 +347,16 @@ fieldABC
 				t.Errorf("expected length of output to be %d, got %d", e, a)
 			}
 
-			percentMatch := percentageMatch(trimmedExpectedOutput, trimmedActualOutput)
-			if percentMatch < minPercentageMatch {
-				t.Errorf("expected percentage match to be %f, got %f", minPercentageMatch, percentMatch)
+			if trimmedExpectedOutput != trimmedActualOutput {
+				x := difflib.UnifiedDiff{
+					A:        difflib.SplitLines(trimmedExpectedOutput),
+					B:        difflib.SplitLines(trimmedActualOutput),
+					FromFile: "expected",
+					ToFile:   "actual",
+					Context:  5,
+				}
+				text, _ := difflib.GetUnifiedDiffString(x)
+				t.Fatalf("expected does not match actual:\n%s\n", text)
 			}
 		}
 		t.Run(test.Name, fn)
@@ -411,6 +369,7 @@ func TestMarshalMutation(t *testing.T) {
 		Name           string
 		Input          interface{}
 		Fields         Fields
+		Option         marshalOption
 		ExpectedOutput string // IfExpectedOutput == "", it implies an error.
 	}{
 		{
@@ -674,6 +633,36 @@ fieldABC
 }
 }`,
 		},
+		{
+			Name: "SimpleWithJSON",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `mutation {
+testQuery {
+differentField
+}
+}`,
+		},
+		{
+			Name: "JSONOverriddenByGoqlTag",
+			Input: struct {
+				TestQuery struct {
+					FieldOne string `json:"differentField" goql:"overrideName"`
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `mutation {
+testQuery {
+overrideName
+}
+}`,
+		},
 	}
 
 	for _, test := range tt {
@@ -682,7 +671,7 @@ fieldABC
 		fn := func(t *testing.T) {
 			t.Parallel()
 
-			actualOutput, err := MarshalMutation(test.Input, test.Fields)
+			actualOutput, err := MarshalMutationWithOptions(test.Input, test.Fields, test.Option)
 			if err != nil {
 				if test.ExpectedOutput == "" {
 					// The error was expected, return without reporting anything.
@@ -698,9 +687,16 @@ fieldABC
 				t.Errorf("expected length of output to be %d, got %d", e, a)
 			}
 
-			percentMatch := percentageMatch(trimmedExpectedOutput, trimmedActualOutput)
-			if percentMatch < minPercentageMatch {
-				t.Errorf("expected percentage match to be %f, got %f", minPercentageMatch, percentMatch)
+			if trimmedExpectedOutput != trimmedActualOutput {
+				x := difflib.UnifiedDiff{
+					A:        difflib.SplitLines(trimmedExpectedOutput),
+					B:        difflib.SplitLines(trimmedActualOutput),
+					FromFile: "expected",
+					ToFile:   "actual",
+					Context:  5,
+				}
+				text, _ := difflib.GetUnifiedDiffString(x)
+				t.Fatalf("expected does not match actual:\n%s\n", text)
 			}
 		}
 		t.Run(test.Name, fn)
