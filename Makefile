@@ -1,6 +1,6 @@
 APP := goql
 OSS := true
-_ := $(shell ./scripts/devbase.sh) 
+_ := $(shell ./scripts/devbase.sh)
 
 include .bootstrap/root/Makefile
 
