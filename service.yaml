@@ -26,10 +26,10 @@ arguments:
     allowMajorVersions: false
     enablePrereleases: false
     prereleasesBranch: ""
-  reportingTeam: end-ades
+  reportingTeam: fnd-dt
   resources: {}
   service: false
-  slack: orexservice-notifications
+  slack: dt-notifications
   terraform:
     datadog:
       grpc:
