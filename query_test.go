@@ -7,6 +7,16 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
+type CyclicParent struct {
+	Name  string
+	Child *CyclicChild
+}
+
+type CyclicChild struct {
+	Name   string
+	Parent *CyclicParent
+}
+
 // TestMarshalQuery tests the MarshalQuery function.
 func TestMarshalQuery(t *testing.T) {
 	tt := []struct {
@@ -320,6 +330,53 @@ differentField
 			ExpectedOutput: `query {
 testQuery {
 overrideName
+}
+}`,
+		},
+		{
+			Name: "CyclicStructuresWithFields",
+			Input: struct {
+				TestQuery struct {
+					Parent *CyclicParent
+				}
+			}{},
+			Fields: Fields{
+				"parent": Fields{
+					"name": true,
+					"child": Fields{
+						"name": true,
+					},
+				},
+			},
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+parent {
+name
+child {
+name
+}
+}
+}
+}`,
+		},
+		{
+			Name: "CyclicStructuresWithoutFields",
+			Input: struct {
+				TestQuery struct {
+					Parent *CyclicParent
+				}
+			}{},
+			Fields: nil,
+			Option: OptFallbackJSONTag,
+			ExpectedOutput: `query {
+testQuery {
+parent {
+name
+child {
+name
+}
+}
 }
 }`,
 		},
