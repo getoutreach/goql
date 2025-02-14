@@ -2,7 +2,7 @@
 # syntax, such as anchors, will be fixed automatically.
 version: 2.1
 orbs:
-  shared: getoutreach/shared@2.28.2
+  shared: getoutreach/shared@2.29.0
   queue: eddiewebb/queue@2.2.1
   ## <<Stencil::Block(CircleCIExtraOrbs)>>
 
@@ -45,6 +45,10 @@ test: &test
 # Branches used for releasing code, pre-release or not
 release_branches: &release_branches
   - "main"
+
+## <<Stencil::Block(circleAnchorExtra)>>
+
+## <</Stencil::Block>>
 
 jobs:
   {}
