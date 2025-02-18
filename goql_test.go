@@ -53,8 +53,6 @@ func TestNewClient(t *testing.T) {
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 

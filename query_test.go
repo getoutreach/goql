@@ -326,8 +326,6 @@ overrideName
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 
@@ -666,8 +664,6 @@ overrideName
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 

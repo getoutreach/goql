@@ -138,8 +138,8 @@ func (f *field) tokens() []token {
 	}
 
 	// Recurse through children tokens.
-	for _, field := range f.Fields {
-		tokens = append(tokens, field.tokens()...)
+	for i := range f.Fields {
+		tokens = append(tokens, f.Fields[i].tokens()...)
 	}
 
 	return tokens
@@ -229,15 +229,16 @@ func (f *field) tokenizeWithFields(w io.Writer, fields interface{}) (bool, error
 	if len(f.Fields) > 0 {
 		io.WriteString(w, " {\n") //nolint:errcheck
 
-		for _, field := range f.Fields {
+		for i := range f.Fields {
 			var written bool
 			var err error
+			ff := f.Fields[i]
 
 			switch ts := fields.(type) {
 			case Fields:
-				written, err = field.tokenizeWithFields(w, ts[field.Decl.Name])
+				written, err = ff.tokenizeWithFields(w, ts[ff.Decl.Name])
 			default:
-				written, err = field.tokenizeWithFields(w, nil)
+				written, err = ff.tokenizeWithFields(w, nil)
 			}
 
 			if err != nil {
@@ -286,11 +287,12 @@ func (f *field) tokenize(w io.Writer, fields Fields) (bool, error) { //nolint:go
 	if len(f.Fields) > 0 {
 		io.WriteString(w, " {\n") //nolint:errcheck
 
-		for _, field := range f.Fields {
+		for i := range f.Fields {
+			ff := f.Fields[i]
 			if fields == nil {
-				written, err = field.tokenizeAsLeaf(w, nil)
+				written, err = ff.tokenizeAsLeaf(w, nil)
 			} else {
-				written, err = field.tokenizeWithFields(w, fields)
+				written, err = ff.tokenizeWithFields(w, fields)
 			}
 
 			if err != nil {
