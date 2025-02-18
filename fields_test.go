@@ -76,8 +76,6 @@ func TestFieldsFromDelimitedList(t *testing.T) {
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 
@@ -145,8 +143,6 @@ func TestFieldsFromURLQueryParam(t *testing.T) {
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 
@@ -195,8 +191,6 @@ func TestUnion(t *testing.T) {
 	}
 
 	for _, test := range tt {
-		test := test
-
 		fn := func(t *testing.T) {
 			t.Parallel()
 
